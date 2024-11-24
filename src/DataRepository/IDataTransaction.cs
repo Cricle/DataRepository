@@ -1,6 +1,6 @@
 ﻿namespace DataRepository
 {
-    public interface IDataTransaction
+    public interface IDataTransaction : IDisposable
     {
         Guid TransactionId { get; }
 

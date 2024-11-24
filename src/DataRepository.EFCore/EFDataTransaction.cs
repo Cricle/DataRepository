@@ -17,6 +17,8 @@ namespace DataRepository.EFCore
 
         public Task CommitAsync(CancellationToken cancellationToken = default) => Transaction.CommitAsync(cancellationToken);
 
+        public void Dispose() => Transaction.Dispose();
+
         public Task RollbackAsync(CancellationToken cancellationToken = default) => Transaction.RollbackAsync(cancellationToken);
     }
 }

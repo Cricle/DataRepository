@@ -31,25 +31,13 @@ namespace DataRepository.EFCore
 
         public IQueryProvider Provider => query.Provider;
 
-        public IQueryable CreateQuery(Expression expression)
-        {
-            return Context.GetService<IAsyncQueryProvider>().CreateQuery(expression);
-        }
+        public IQueryable CreateQuery(Expression expression) => Context.GetService<IAsyncQueryProvider>().CreateQuery(expression);
 
-        public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
-        {
-            return Context.GetService<IAsyncQueryProvider>().CreateQuery<TElement>(expression);
-        }
+        public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => Context.GetService<IAsyncQueryProvider>().CreateQuery<TElement>(expression);
 
-        public object? Execute(Expression expression)
-        {
-            return Context.GetService<IAsyncQueryProvider>().Execute(expression);
-        }
+        public object? Execute(Expression expression) => Context.GetService<IAsyncQueryProvider>().Execute(expression);
 
-        public TResult Execute<TResult>(Expression expression)
-        {
-            return Context.GetService<IAsyncQueryProvider>().Execute<TResult>(expression);
-        }
+        public TResult Execute<TResult>(Expression expression) => Context.GetService<IAsyncQueryProvider>().Execute<TResult>(expression);
 
         public async Task<IDataTransaction> BeginTransactionAsync(IsolationLevel level = IsolationLevel.ReadCommitted, CancellationToken token = default)
         {
@@ -62,38 +50,43 @@ namespace DataRepository.EFCore
         public int Delete(TEntity entity)
         {
             Context.Remove(entity);
-            return Context.SaveChanges();
+            return SaveChanges();
         }
 
         public async Task<int> DeleteAsync(TEntity entity, CancellationToken token = default)
         {
             Context.Remove(entity);
-            return await Context.SaveChangesAsync(token);
+            return await SaveChangesAsync(token);
         }
 
         public int Insert(TEntity entity)
         {
             Context.Add(entity);
-            return Context.SaveChanges();
+            return SaveChanges();
         }
 
         public async Task<int> InsertAsync(TEntity entity, CancellationToken token = default)
         {
             Context.Add(entity);
-            return await Context.SaveChangesAsync(token);
+            return await SaveChangesAsync(token);
         }
 
         public int Update(TEntity entity)
         {
             Context.Update(entity);
-            return Context.SaveChanges();
+            return SaveChanges();
         }
 
         public async Task<int> UpdateAsync(TEntity entity, CancellationToken token = default)
         {
-            Context.Update(entity);
-            return await Context.SaveChangesAsync(token);
+            Update(entity);
+            return await SaveChangesAsync(token);
         }
+
+        protected virtual Task<int> SaveChangesAsync(CancellationToken token = default) => Context.SaveChangesAsync(token);
+
+        protected virtual int SaveChanges() => Context.SaveChanges();
+
         #endregion
 
         #region Batch
@@ -101,40 +94,40 @@ namespace DataRepository.EFCore
         public int InsertMany(IEnumerable<TEntity> entities)
         {
             Context.AddRange(entities);
-            return Context.SaveChanges();
+            return SaveChanges();
         }
 
         public async Task<int> InsertManyAsync(IEnumerable<TEntity> entities, CancellationToken token = default)
         {
             Context.AddRange(entities);
-            return await Context.SaveChangesAsync(token);
+            return await SaveChangesAsync(token);
         }
 
         public int DeleteMany(IEnumerable<TEntity> entities)
         {
             Context.RemoveRange(entities);
-            return Context.SaveChanges();
+            return SaveChanges();
         }
 
         public async Task<int> DeleteManyAsync(IEnumerable<TEntity> entities, CancellationToken token = default)
         {
             Context.RemoveRange(entities);
-            return await Context.SaveChangesAsync(token);
+            return await SaveChangesAsync(token);
         }
 
         public int UpdateMany(IEnumerable<TEntity> entities)
         {
             Context.UpdateRange(entities);
-            return Context.SaveChanges();
+            return SaveChanges();
         }
 
         public async Task<int> UpdateManyAsync(IEnumerable<TEntity> entities, CancellationToken token = default)
         {
             Context.UpdateRange(entities);
-            return await Context.SaveChangesAsync(token);
+            return await SaveChangesAsync(token);
         }
 
-        public int UpdateInQuery(Expression expression) 
+        public int UpdateInQuery(Expression expression)
             => query.ExecuteUpdate((Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>>)expression);
 
         public Task<int> UpdateInQueryAsync(Expression expression, CancellationToken token = default)
@@ -146,18 +139,6 @@ namespace DataRepository.EFCore
         public Task<int> DeleteInQueryAsync(CancellationToken token = default)
           => query.ExecuteDeleteAsync(token);
 
-        public Task<int> CountAsync(CancellationToken token = default) => query.CountAsync(token);
-
-        public Task<long> LongCountAsync(CancellationToken token = default) => query.LongCountAsync(token);
-
-        public Task<TEntity?> FirstOrDefaultAsync(CancellationToken token = default) => query.FirstOrDefaultAsync(token);
-
-        public Task<TEntity?> LastOrDefaultAsync(CancellationToken token = default) => query.LastOrDefaultAsync(token);
-
-        public Task<TEntity[]> ToArrayAsync(CancellationToken token = default) => query.ToArrayAsync(token);
-
-        public Task<List<TEntity>> ToListAsync(CancellationToken token = default) => query.ToListAsync(token);
-
         public IDataRespository<TEntity> Where(Expression<Func<TEntity, bool>> expression) => new EFRespository<TEntity>(Context, query.Where(expression));
 
         public IEnumerator<TEntity> GetEnumerator() => query.GetEnumerator();
@@ -168,10 +149,9 @@ namespace DataRepository.EFCore
             where TNewEntity : class
             => new EFRespository<TNewEntity>(Context, query.Select(expression));
 
-        public IUpdateSetBuilder<TEntity> CreateUpdateBuilder()
-        {
-            return new EFUpdateSetBuilder<TEntity>();
-        }
+        public IUpdateSetBuilder<TEntity> CreateUpdateBuilder() => new EFUpdateSetBuilder<TEntity>();
+
+        public IAsyncEnumerator<TEntity> GetAsyncEnumerator(CancellationToken cancellationToken = default) => query.AsAsyncEnumerable().GetAsyncEnumerator(cancellationToken);
 
         #endregion
     }

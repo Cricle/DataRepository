@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
@@ -222,7 +223,7 @@ namespace DataRepository.EFCore.Test
             var sut = GetSut();
             var res = await sut.LastOrDefaultAsync();
 
-            res.Should().Be(students[students.Count-1]);
+            res.Should().Be(students[students.Count - 1]);
             theDbContext.Verify(x => x.Set<Student>());
         }
 
@@ -292,7 +293,7 @@ namespace DataRepository.EFCore.Test
             var sut = GetMemorySut();
 
             var provider = sut.Context.GetService<IAsyncQueryProvider>();
-            sut.CreateQuery(Expression.Empty()).Should().Be(provider.CreateQuery(Expression.Empty()));
+            sut.CreateQuery(Expression.Empty()).Should().Be(provider.CreateQuery(sut.Context.Set<Student>().AsNoTracking().Expression));
         }
 
         [Theory, AutoData]
@@ -359,12 +360,87 @@ namespace DataRepository.EFCore.Test
             data.Should().BeNull();
         }
 
+        [Theory, AutoData]
+        public async Task BeginTransactionAsync_Rollback_NothingChanged(Student student)
+        {
+            var sut = GetMemorySut();
+            sut.Context.Set<Student>().Add(student);
+            sut.Context.SaveChanges();
+            sut.Context.ChangeTracker.Clear();
+
+            using (var trans = await sut.BeginTransactionAsync())
+            {
+                student.Hit++;
+                sut.Context.SaveChanges();
+                sut.Context.ChangeTracker.Clear();
+                await trans.RollbackAsync();
+            }
+            sut.Context.Set<Student>().First().Hit.Should().Be(student.Hit - 1);
+        }
+
+        [Theory, AutoData]
+        public async Task BeginTransactionAsync_Commit_NothingChanged(Student student)
+        {
+            var sut = GetMemorySut();
+            sut.Context.Set<Student>().Add(student);
+            sut.Context.SaveChanges();
+            sut.Context.ChangeTracker.Clear();
+
+            using (var trans = await sut.BeginTransactionAsync())
+            {
+                sut.Context.Set<Student>().ExecuteUpdate(x => x.SetProperty(y => y.Hit, y => y.Hit + 1));
+                await trans.CommitAsync();
+            }
+            sut.Context.Set<Student>().Where(x=>x.Name==student.Name).First().Hit.Should().Be(student.Hit + 1);
+        }
+
+        [Theory, AutoData]
+        public void Select_MustProjectColumn(Student student)
+        {
+            var sut = GetMemorySut();
+            sut.Context.Set<Student>().Add(student);
+            sut.Context.SaveChanges();
+            sut.Context.ChangeTracker.Clear();
+            var data = sut.Where(x=>x.Name==student.Name).Select(x => new
+            {
+                D1 = x.Hit + 1,
+                N = x.Name
+            }).First();
+
+            data.Should().BeEquivalentTo(new
+            {
+                D1 = student.Hit + 1,
+                N = student.Name
+            });
+        }
+
+        [Theory, AutoData]
+        public void GetEnumerator_EnumeratorFromDb(Student student)
+        {
+            var sut = GetMemorySut();
+            sut.Context.Set<Student>().Add(student);
+            sut.Context.SaveChanges();
+            sut.Context.ChangeTracker.Clear();
+            var enu = sut.GetEnumerator();
+
+            enu.MoveNext().Should().BeTrue();
+            enu.Current.Should().BeEquivalentTo(student);
+            enu.MoveNext().Should().BeFalse();
+
+            var enuAno = ((IEnumerable)sut).GetEnumerator();
+
+            enuAno.MoveNext().Should().BeTrue();
+            enuAno.Current.Should().BeEquivalentTo(student);
+            enuAno.MoveNext().Should().BeFalse();
+        }
+
         private EFRespository<Student> GetSut() =>
             new EFRespository<Student>(theDbContext.Object);
 
         private EFRespository<Student> GetMemorySut()
         {
-            var dbc = new TheDbContext(new DbContextOptionsBuilder<TheDbContext>().UseSqlite("DataSource=file::memory:?cache=shared").Options);
+            var dbc = new TheDbContext(new DbContextOptionsBuilder<TheDbContext>().UseSqlite("DataSource=file::memory:").Options);
+            dbc.Database.EnsureDeleted();
             dbc.Database.EnsureCreated();
             return new EFRespository<Student>(dbc);
         }
@@ -388,7 +464,7 @@ namespace DataRepository.EFCore.Test
 
                 modelBuilder.Entity<Student>(b =>
                 {
-                    b.HasKey(x=>x.Name);
+                    b.HasKey(x => x.Name);
                 });
             }
         }
