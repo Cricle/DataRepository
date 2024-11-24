@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Test>true</Test>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\DataRepository\DataRepository.csproj" />
+	</ItemGroup>
+</Project>

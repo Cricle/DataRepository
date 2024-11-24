@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Test>true</Test>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Moq.EntityFrameworkCore" Version="8.0.1.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\DataRepository.EFCore\DataRepository.EFCore.csproj" />
+	</ItemGroup>
+</Project>
