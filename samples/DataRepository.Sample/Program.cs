@@ -2,11 +2,12 @@
 using DataRepository.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MR.EntityFrameworkCore.KeysetPagination;
 using System.ComponentModel.DataAnnotations;
 
 internal class Program
 {
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
         var factory = LoggerFactory.Create(x => x.AddConsole());
         var options = new DbContextOptionsBuilder<StudentDbContext>()
@@ -19,12 +20,13 @@ internal class Program
         dbc.SaveChanges();
         dbc.ChangeTracker.Clear();
         var rep = new EFRespository<Student>(dbc);
-        var a = rep.Where(x => x.Id == 1)
-            .UpdateInQuery(x => x.Set(y => y.Name, y => dbc.Students.Where(q => q.Id == 1).Count() + "2"));
-        rep.Where(x => x.Id == 1).Count();
-        Console.WriteLine(a);
+        //var a = rep.Where(x => x.Id == 1)
+        //    .UpdateInQuery(x => x.Set(y => y.Name, y => dbc.Students.Where(q => q.Id == 1).Count() + "2"));
+        var ctx = await rep.Where(x => x.Id == 1).PageQueryAsync(1, 20, default);
+
         Console.WriteLine(rep.FirstOrDefaultAsync().Result);
     }
+
 
     public record class Student
     {

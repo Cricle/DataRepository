@@ -1,10 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
+		<TargetFrameworks>$(TargetFrameworks);netstandard2.1;netstandard2.0;</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)'=='netstandard2.1'">
+	  <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.0" />
+	</ItemGroup>
 
 </Project>

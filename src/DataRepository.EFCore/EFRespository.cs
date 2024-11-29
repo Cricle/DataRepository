@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System.Collections;
 using System.Data;
 using System.Linq.Expressions;
@@ -152,6 +153,22 @@ namespace DataRepository.EFCore
         public IUpdateSetBuilder<TEntity> CreateUpdateBuilder() => new EFUpdateSetBuilder<TEntity>();
 
         public IAsyncEnumerator<TEntity> GetAsyncEnumerator(CancellationToken cancellationToken = default) => query.AsAsyncEnumerable().GetAsyncEnumerator(cancellationToken);
+
+        public Task<int> CountAsync(CancellationToken token = default) => query.CountAsync(token);
+
+        public Task<TEntity?> FirstOrDefaultAsync(CancellationToken token = default) => query.FirstOrDefaultAsync(token);
+
+        public Task<TEntity?> LastOrDefaultAsync(CancellationToken token = default) => query.LastOrDefaultAsync(token);
+
+        public Task<bool> AnyAsync(CancellationToken token = default) => query.AnyAsync(token);
+
+        public Task<List<TEntity>> ToListAsync(CancellationToken token = default)=>query.ToListAsync(token);
+
+        public Task<TEntity[]> ToArrayAsync(CancellationToken token = default) => query.ToArrayAsync(token);
+
+        public IDataRespository<TEntity> Skip(int value) => new EFRespository<TEntity>(Context, query.Skip(value));
+
+        public IDataRespository<TEntity> Take(int value) => new EFRespository<TEntity>(Context, query.Take(value));
 
         #endregion
     }

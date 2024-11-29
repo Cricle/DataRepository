@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Query;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -49,6 +50,7 @@ namespace DataRepository.EFCore
             return Build();
         }
 
+        [ExcludeFromCodeCoverage]
         class EntityCache
         {
             private static readonly Type SetPropertyCallType = typeof(SetPropertyCalls<>).MakeGenericType(typeof(TEntity));

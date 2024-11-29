@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
+using Moq.EntityFrameworkCore;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
@@ -293,7 +294,18 @@ namespace DataRepository.EFCore.Test
             var sut = GetMemorySut();
 
             var provider = sut.Context.GetService<IAsyncQueryProvider>();
-            sut.CreateQuery(Expression.Empty()).Should().Be(provider.CreateQuery(sut.Context.Set<Student>().AsNoTracking().Expression));
+            var actual = sut.CreateQuery(sut.Context.Set<Student>().AsNoTracking().Expression);
+            actual.Expression.Should().BeEquivalentTo(sut.Context.Set<Student>().AsNoTracking().Expression);
+        }
+
+        [Fact]
+        public void QueryOfEfQueryWithEntity()
+        {
+            var sut = GetMemorySut();
+
+            var provider = sut.Context.GetService<IAsyncQueryProvider>();
+            var actual = sut.CreateQuery<Student>(sut.Context.Set<Student>().AsNoTracking().Expression);
+            actual.Expression.Should().BeEquivalentTo(sut.Context.Set<Student>().AsNoTracking().Expression);
         }
 
         [Theory, AutoData]
@@ -417,10 +429,9 @@ namespace DataRepository.EFCore.Test
         [Theory, AutoData]
         public void GetEnumerator_EnumeratorFromDb(Student student)
         {
-            var sut = GetMemorySut();
-            sut.Context.Set<Student>().Add(student);
-            sut.Context.SaveChanges();
-            sut.Context.ChangeTracker.Clear();
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(new[] {student });
+
+            var sut = GetSut();
             var enu = sut.GetEnumerator();
 
             enu.MoveNext().Should().BeTrue();
