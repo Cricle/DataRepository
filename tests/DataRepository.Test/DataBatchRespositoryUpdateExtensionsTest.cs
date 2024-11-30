@@ -1,5 +1,4 @@
-﻿using DataRepository;
-using DataRepository.Models;
+﻿using DataRepository.Models;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
@@ -60,11 +59,11 @@ namespace DataRepository.Test
         }
 
         [Theory]
-        [InlineData(0,1)]
-        [InlineData(-1,1)]
+        [InlineData(0, 1)]
+        [InlineData(-1, 1)]
         [InlineData(1, 0)]
         [InlineData(1, -1)]
-        public async Task PageQueryAsync_ReturnEmpty_WhenPageIndexOrPagetCountMin(int pageIndex,int pageCount)
+        public async Task PageQueryAsync_ReturnEmpty_WhenPageIndexOrPagetCountMin(int pageIndex, int pageCount)
         {
             var res = await DataBatchRespositoryUpdateExtensions.PageQueryAsync(studentDataRespositoryMock.Object, pageIndex, pageCount);
 

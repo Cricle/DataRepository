@@ -147,7 +147,7 @@ namespace DataRepository.EFCore
 
         public IDataRespository<TNewEntity> Select<TNewEntity>(Expression<Func<TEntity, TNewEntity>> expression)
             where TNewEntity : class
-            => new EFRespository< TNewEntity>(Context, query.Select(expression));
+            => new EFRespository<TNewEntity>(Context, query.Select(expression));
 
         public IUpdateSetBuilder<TEntity> CreateUpdateBuilder() => new EFUpdateSetBuilder<TEntity>();
 
@@ -161,7 +161,7 @@ namespace DataRepository.EFCore
 
         public Task<bool> AnyAsync(CancellationToken token = default) => query.AnyAsync(token);
 
-        public Task<List<TEntity>> ToListAsync(CancellationToken token = default)=>query.ToListAsync(token);
+        public Task<List<TEntity>> ToListAsync(CancellationToken token = default) => query.ToListAsync(token);
 
         public Task<TEntity[]> ToArrayAsync(CancellationToken token = default) => query.ToArrayAsync(token);
 

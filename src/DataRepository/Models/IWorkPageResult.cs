@@ -1,6 +1,6 @@
 ﻿namespace DataRepository.Models
 {
-    public interface IWorkPageResult<T>:IWorkDataResult<IEnumerable<T>>
+    public interface IWorkPageResult<T> : IWorkDataResult<IEnumerable<T>>
     {
         int TotalCount { get; }
 

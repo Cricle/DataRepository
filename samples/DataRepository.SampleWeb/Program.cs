@@ -1,4 +1,3 @@
-using DataRepository;
 using DataRepository.SampleWeb;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,9 +19,9 @@ internal class Program
 
         var app = builder.Build();
 
-        using (var scope=app.Services.CreateScope())
+        using (var scope = app.Services.CreateScope())
         {
-            var dbc=scope.ServiceProvider.GetRequiredService<NumberDbContext>();
+            var dbc = scope.ServiceProvider.GetRequiredService<NumberDbContext>();
             dbc.Database.EnsureCreated();
         }
 

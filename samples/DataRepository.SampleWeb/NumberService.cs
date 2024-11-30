@@ -15,7 +15,7 @@ namespace DataRepository.SampleWeb
 
         public async Task<WorkDataResult<bool>> InsertAsync(int id, int value)
         {
-            var result = await _respository.Where(x => x.Id == id).InsertAsync(new Number { Id=id,Value=value});
+            var result = await _respository.Where(x => x.Id == id).InsertAsync(new Number { Id = id, Value = value });
             return result > 0;
         }
         public async Task<WorkDataResult<bool>> UpdateAsync(int id, int value)

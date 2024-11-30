@@ -16,7 +16,7 @@ namespace DataRepository.SampleWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> Page([FromQuery] int pageIndex, [FromQuery] int pageSize)
         {
-            var datas = await numberService.PageAsync(pageIndex,pageSize);
+            var datas = await numberService.PageAsync(pageIndex, pageSize);
 
             return Ok(datas);
         }
@@ -30,7 +30,7 @@ namespace DataRepository.SampleWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Update([FromQuery]int id, [FromQuery] int value)
+        public async Task<IActionResult> Update([FromQuery] int id, [FromQuery] int value)
         {
             var datas = await numberService.UpdateAsync(id, value);
 

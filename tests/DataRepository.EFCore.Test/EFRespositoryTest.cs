@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore.Query;
 using Moq.EntityFrameworkCore;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 
 namespace DataRepository.EFCore.Test
 {
@@ -403,7 +402,7 @@ namespace DataRepository.EFCore.Test
                 sut.Context.Set<Student>().ExecuteUpdate(x => x.SetProperty(y => y.Hit, y => y.Hit + 1));
                 await trans.CommitAsync();
             }
-            sut.Context.Set<Student>().Where(x=>x.Name==student.Name).First().Hit.Should().Be(student.Hit + 1);
+            sut.Context.Set<Student>().Where(x => x.Name == student.Name).First().Hit.Should().Be(student.Hit + 1);
         }
 
         [Theory, AutoData]
@@ -413,7 +412,7 @@ namespace DataRepository.EFCore.Test
             sut.Context.Set<Student>().Add(student);
             sut.Context.SaveChanges();
             sut.Context.ChangeTracker.Clear();
-            var data = sut.Where(x=>x.Name==student.Name).Select(x => new
+            var data = sut.Where(x => x.Name == student.Name).Select(x => new
             {
                 D1 = x.Hit + 1,
                 N = x.Name
@@ -429,7 +428,7 @@ namespace DataRepository.EFCore.Test
         [Theory, AutoData]
         public void GetEnumerator_EnumeratorFromDb(Student student)
         {
-            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(new[] {student });
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(new[] { student });
 
             var sut = GetSut();
             var enu = sut.GetEnumerator();
@@ -473,7 +472,7 @@ namespace DataRepository.EFCore.Test
             theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
 
             var sut = GetSut();
-            var res = await sut.Where(x=>x.Hit==-1).FirstOrDefaultAsync();
+            var res = await sut.Where(x => x.Hit == -1).FirstOrDefaultAsync();
 
             res.Should().BeNull();
         }
@@ -486,7 +485,7 @@ namespace DataRepository.EFCore.Test
             var sut = GetSut();
             var res = await sut.LastOrDefaultAsync();
 
-            res.Should().Be(students[students.Count-1]);
+            res.Should().Be(students[students.Count - 1]);
         }
 
         [Theory, AutoData]
@@ -572,7 +571,7 @@ namespace DataRepository.EFCore.Test
             theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
 
             var sut = GetSut();
-            var res = await sut.ByQuery(x=>x.Take(1)).ToArrayAsync();
+            var res = await sut.ByQuery(x => x.Take(1)).ToArrayAsync();
 
             res.Should().BeEquivalentTo(students.Take(1).ToArray());
         }

@@ -6,6 +6,7 @@
         {
 
         }
+
         public WorkDataResult(T? data) : base(null) => Data = data;
 
         public T? Data { get; }

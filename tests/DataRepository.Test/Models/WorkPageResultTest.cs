@@ -4,7 +4,7 @@ namespace DataRepository.Test.Models
 {
     public class WorkPageResultTest
     {
-        [Theory,AutoData]
+        [Theory, AutoData]
         public void InitWithFail_MustFail(Fail fail)
         {
             var result = new WorkPageResult<object>(fail);
@@ -18,9 +18,9 @@ namespace DataRepository.Test.Models
         }
 
         [Theory]
-        [InlineData(0,1)]
-        [InlineData(1,0)]
-        public void TotalCountOrPageSizeError_TotalPageZero(int totalCount,int pageSize)
+        [InlineData(0, 1)]
+        [InlineData(1, 0)]
+        public void TotalCountOrPageSizeError_TotalPageZero(int totalCount, int pageSize)
         {
             var result = new WorkPageResult<object>([], totalCount, 1, pageSize);
 
@@ -33,13 +33,13 @@ namespace DataRepository.Test.Models
         }
 
         [Theory, AutoData]
-        public void InitWithData_MustSucceed(List<object> list,int totalCount,int pageIndex,int pageSize)
+        public void InitWithData_MustSucceed(List<object> list, int totalCount, int pageIndex, int pageSize)
         {
-            var result = new WorkPageResult<object>(list,totalCount,pageIndex, pageSize);
+            var result = new WorkPageResult<object>(list, totalCount, pageIndex, pageSize);
 
             result.Fail.Should().BeNull();
             result.Succeed.Should().BeTrue();
-            result.PageCount.Should().Be((int)Math.Ceiling((double)totalCount/pageSize));
+            result.PageCount.Should().Be((int)Math.Ceiling((double)totalCount / pageSize));
             result.TotalCount.Should().Be(totalCount);
             result.PageIndex.Should().Be(pageIndex);
             result.PageSize.Should().Be(pageSize);
