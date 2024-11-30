@@ -445,6 +445,138 @@ namespace DataRepository.EFCore.Test
             enuAno.MoveNext().Should().BeFalse();
         }
 
+        [Theory, AutoData]
+        public async Task CountAsync_ReturnDataCount(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.CountAsync();
+
+            res.Should().Be(students.Count);
+        }
+
+        [Theory, AutoData]
+        public async Task FirstOrDefaultAsync_ReturnFirst(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.FirstOrDefaultAsync();
+
+            res.Should().Be(students[0]);
+        }
+
+        [Theory, AutoData]
+        public async Task FirstOrDefaultAsync_ReturnNullWhenNotFound(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.Where(x=>x.Hit==-1).FirstOrDefaultAsync();
+
+            res.Should().BeNull();
+        }
+
+        [Theory, AutoData]
+        public async Task LastOrDefaultAsync_ReturnFirst(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.LastOrDefaultAsync();
+
+            res.Should().Be(students[students.Count-1]);
+        }
+
+        [Theory, AutoData]
+        public async Task LastOrDefaultAsync_ReturnNullWhenNotFound(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.Where(x => x.Hit == -1).LastOrDefaultAsync();
+
+            res.Should().BeNull();
+        }
+
+        [Theory, AutoData]
+        public async Task AnyAsync_ReturnTrue(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.Where(x => x.Hit == students[0].Hit).AnyAsync();
+
+            res.Should().BeTrue();
+        }
+
+        [Theory, AutoData]
+        public async Task AnyAsync_ReturnFalse(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.Where(x => x.Hit == -1).AnyAsync();
+
+            res.Should().BeFalse();
+        }
+
+        [Theory, AutoData]
+        public async Task ToListAsync_ReturnDataList(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.ToListAsync();
+
+            res.Should().BeEquivalentTo(students);
+        }
+
+        [Theory, AutoData]
+        public async Task ToArrayAsync_ReturnDataArray(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.ToArrayAsync();
+
+            res.Should().BeEquivalentTo(students.ToArray());
+        }
+
+        [Theory, AutoData]
+        public async Task Take_ReturnDataTake(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.Take(1).ToArrayAsync();
+
+            res.Should().BeEquivalentTo(students.Take(1).ToArray());
+        }
+
+        [Theory, AutoData]
+        public async Task Skip_ReturnDataSkip(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.Skip(1).ToArrayAsync();
+
+            res.Should().BeEquivalentTo(students.Skip(1).ToArray());
+        }
+
+        [Theory, AutoData]
+        public async Task ByQuery_ReturnDataNewQuery(List<Student> students)
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
+
+            var sut = GetSut();
+            var res = await sut.ByQuery(x=>x.Take(1)).ToArrayAsync();
+
+            res.Should().BeEquivalentTo(students.Take(1).ToArray());
+        }
+
         private EFRespository<Student> GetSut() =>
             new EFRespository<Student>(theDbContext.Object);
 

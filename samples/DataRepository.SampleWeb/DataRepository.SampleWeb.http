@@ -1,0 +1,6 @@
+@DataRepository.SampleWeb_HostAddress = http://localhost:5230
+
+GET {{DataRepository.SampleWeb_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

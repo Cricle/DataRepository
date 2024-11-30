@@ -23,6 +23,8 @@ namespace DataRepository
 
         IDataRespository<TEntity> Take(int value);
 
+        IDataRespository<TEntity> ByQuery(Func<IQueryable<TEntity>, IQueryable<TEntity>> func);
+
         IDataRespository<TNewEntity> Select<TNewEntity>(Expression<Func<TEntity, TNewEntity>> expression)
             where TNewEntity : class;
     }

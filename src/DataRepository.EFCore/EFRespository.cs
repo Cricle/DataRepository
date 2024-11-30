@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System.Collections;
 using System.Data;
 using System.Linq.Expressions;
@@ -148,7 +147,7 @@ namespace DataRepository.EFCore
 
         public IDataRespository<TNewEntity> Select<TNewEntity>(Expression<Func<TEntity, TNewEntity>> expression)
             where TNewEntity : class
-            => new EFRespository<TNewEntity>(Context, query.Select(expression));
+            => new EFRespository< TNewEntity>(Context, query.Select(expression));
 
         public IUpdateSetBuilder<TEntity> CreateUpdateBuilder() => new EFUpdateSetBuilder<TEntity>();
 
@@ -169,6 +168,9 @@ namespace DataRepository.EFCore
         public IDataRespository<TEntity> Skip(int value) => new EFRespository<TEntity>(Context, query.Skip(value));
 
         public IDataRespository<TEntity> Take(int value) => new EFRespository<TEntity>(Context, query.Take(value));
+
+        public IDataRespository<TEntity> ByQuery(Func<IQueryable<TEntity>, IQueryable<TEntity>> func)
+            => new EFRespository<TEntity>(Context, func(query));
 
         #endregion
     }
