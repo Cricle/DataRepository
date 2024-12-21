@@ -1,6 +1,6 @@
-$version=$args[0]
-$accessToken=$args[1]
-dotnet build -c Release DataRepository.sln
+$accessToken=$args[0]
+$version=Get-Content version
+dotnet build -c Release DataRepository.sln -p:Version=$version
 $paths=ls src | select Name
 for($x=0;$x -lt $paths.length; $x=$x+1)
 {

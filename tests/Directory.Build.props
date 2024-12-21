@@ -1,11 +1,12 @@
 <Project>
     <PropertyGroup>
-        <TargetFrameworks>net8.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 
         <IsPackable Condition="'$(Test)' == 'true'">false</IsPackable>
         <IsTestProject Condition="'$(Test)' == 'true'">true</IsTestProject>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(Test)' == 'true'">

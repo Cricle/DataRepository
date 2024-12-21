@@ -8,8 +8,7 @@ namespace DataRepository
         {
             var builder = respository.CreateUpdateBuilder();
             action(builder);
-            var exp = builder.Build();
-            return respository.UpdateInQuery(exp);
+            return respository.UpdateInQuery(builder.Build());
         }
 
         public static Task<int> UpdateInQueryAsync<TEntity>(this IDataBatchRespository<TEntity> respository, Action<IUpdateSetBuilder<TEntity>> action, CancellationToken token = default)

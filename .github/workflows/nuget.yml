@@ -1,0 +1,19 @@
+name: .NUGET Push
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 9.0.x
+    - name: Upload NuGet package
+      run: |
+        ./uploadnuget.ps1 ${{ secrets.NUGET_KEY }}

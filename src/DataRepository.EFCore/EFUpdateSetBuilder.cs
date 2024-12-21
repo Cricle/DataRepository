@@ -25,9 +25,8 @@ namespace DataRepository.EFCore
         public Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> Build()
         {
             if (current == null)
-            {
                 throw new InvalidOperationException("Must at less one set");
-            }
+            
             return Expression.Lambda<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>>(current, paramter);
         }
 
@@ -55,9 +54,10 @@ namespace DataRepository.EFCore
         {
             private static readonly Type SetPropertyCallType = typeof(SetPropertyCalls<>).MakeGenericType(typeof(TEntity));
             private static readonly MethodInfo[] Methods = SetPropertyCallType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
-
+            
             public class PropertyCache<TProperty>
             {
+
                 public static readonly MethodInfo SetPropertyMethod =
                     Methods.FirstOrDefault(x => x.Name == "SetProperty" && x.IsGenericMethod && !x.GetParameters()[1].ParameterType.IsGenericType)?.MakeGenericMethod(typeof(TProperty))
                     ?? throw new InvalidOperationException($"The {SetPropertyCallType} not SetProperty<TProperty>(Func<TSource, TProperty> propertyExpression,TProperty valueExpression) method");
@@ -65,6 +65,7 @@ namespace DataRepository.EFCore
                 public static readonly MethodInfo SetPropertyExpMethod =
                     Methods.FirstOrDefault(x => x.Name == "SetProperty" && x.IsGenericMethod && x.GetParameters()[1].ParameterType.IsGenericType)?.MakeGenericMethod(typeof(TProperty))
                     ?? throw new InvalidOperationException($"The {SetPropertyCallType} not SetProperty<TProperty>(Func<TSource, TProperty> propertyExpression,Func<TEntity, TProperty> valueExpression) method");
+
             }
         }
     }

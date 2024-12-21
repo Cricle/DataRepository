@@ -1,6 +1,5 @@
 <Project>
     <PropertyGroup>
-        <Version>1.0.1</Version>
         <PackageProjectUrl>https://github.com/Cricle/DataRepository</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Cricle/DataRepository</RepositoryUrl>
         <PackageTags>respository,data</PackageTags>

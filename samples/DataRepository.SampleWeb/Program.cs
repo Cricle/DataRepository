@@ -32,8 +32,6 @@ internal class Program
             app.UseSwaggerUI();
         }
 
-        app.UseAuthorization();
-
         app.MapControllers();
 
         app.Run();
