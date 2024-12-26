@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace DataRepository.EFCore
 {
-    public class EFUpdateSetBuilder<TEntity> : IUpdateSetBuilder<TEntity>
+    public sealed class EFUpdateSetBuilder<TEntity> : IUpdateSetBuilder<TEntity>
     {
         private Expression? current;
         private int setCount;
@@ -30,14 +30,14 @@ namespace DataRepository.EFCore
             return Expression.Lambda<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>>(current, paramter);
         }
 
-        public IUpdateSetBuilder<TEntity> Set<TProperty>(Expression<Func<TEntity, TProperty>> selector, TProperty value)
+        public IUpdateSetBuilder<TEntity> SetProperty<TProperty>(Expression<Func<TEntity, TProperty>> selector, TProperty value)
         {
             current = Expression.Call(Instance, EntityCache.PropertyCache<TProperty>.SetPropertyMethod, selector, Expression.Constant(value));
             setCount++;
             return this;
         }
 
-        public IUpdateSetBuilder<TEntity> Set<TProperty>(Expression<Func<TEntity, TProperty>> selector, Expression<Func<TEntity, TProperty>> valueExp)
+        public IUpdateSetBuilder<TEntity> SetProperty<TProperty>(Expression<Func<TEntity, TProperty>> selector, Expression<Func<TEntity, TProperty>> valueExp)
         {
             current = Expression.Call(Instance, EntityCache.PropertyCache<TProperty>.SetPropertyExpMethod, selector, valueExp);
             setCount++;

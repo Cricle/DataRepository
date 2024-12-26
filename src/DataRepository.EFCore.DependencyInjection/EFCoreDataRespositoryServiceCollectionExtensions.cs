@@ -11,18 +11,23 @@ namespace Microsoft.Extensions.DependencyInjection
             where TDbContext : DbContext
         {
             services.TryAddScoped<IDbContextStore, DbContextStore<TDbContext>>();
+            services.TryAddSingleton<IDataRespositoryCreator, EFDataRespositoryCreator<TDbContext>>();
+            services.TryAddScoped(p => p.GetRequiredService<EFDataRespositoryCreator<TDbContext>>().CreateScope());
             services.TryAdd(ServiceDescriptor.Describe(typeof(IDataRespository<>), typeof(DbContextEFRespository<>), serviceLifetime));
             return services;
         }
+
         internal interface IDbContextStore
         {
             DbContext DbContext { get; }
         }
+
         internal sealed class DbContextStore<TDbContext>(TDbContext dbContext) : IDbContextStore
             where TDbContext : DbContext
         {
             public DbContext DbContext { get; } = dbContext;
         }
+
         internal sealed class DbContextEFRespository<TEntity> : EFRespository<TEntity> where TEntity : class
         {
             public DbContextEFRespository(IDbContextStore creator) : base(creator.DbContext)

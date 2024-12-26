@@ -8,8 +8,8 @@ namespace DataRepository
 
         Expression Build();
 
-        IUpdateSetBuilder<TEntity> Set<TProperty>(Expression<Func<TEntity, TProperty>> selector, TProperty value);
+        IUpdateSetBuilder<TEntity> SetProperty<TProperty>(Expression<Func<TEntity, TProperty>> selector, TProperty value);
 
-        IUpdateSetBuilder<TEntity> Set<TProperty>(Expression<Func<TEntity, TProperty>> selector, Expression<Func<TEntity, TProperty>> valueExp);
+        IUpdateSetBuilder<TEntity> SetProperty<TProperty>(Expression<Func<TEntity, TProperty>> selector, Expression<Func<TEntity, TProperty>> valueExp);
     }
 }

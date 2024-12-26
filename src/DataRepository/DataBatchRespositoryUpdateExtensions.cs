@@ -4,18 +4,18 @@ namespace DataRepository
 {
     public static class DataBatchRespositoryUpdateExtensions
     {
-        public static int UpdateInQuery<TEntity>(this IDataBatchRespository<TEntity> respository, Action<IUpdateSetBuilder<TEntity>> action)
+        public static int ExecuteUpdate<TEntity>(this IDataBatchRespository<TEntity> respository, Action<IUpdateSetBuilder<TEntity>> action)
         {
             var builder = respository.CreateUpdateBuilder();
             action(builder);
-            return respository.UpdateInQuery(builder.Build());
+            return respository.ExecuteUpdate(builder.Build());
         }
 
-        public static Task<int> UpdateInQueryAsync<TEntity>(this IDataBatchRespository<TEntity> respository, Action<IUpdateSetBuilder<TEntity>> action, CancellationToken token = default)
+        public static Task<int> ExecuteUpdateAsync<TEntity>(this IDataBatchRespository<TEntity> respository, Action<IUpdateSetBuilder<TEntity>> action, CancellationToken token = default)
         {
             var builder = respository.CreateUpdateBuilder();
             action(builder);
-            return respository.UpdateInQueryAsync(builder.Build(), token);
+            return respository.ExecuteUpdateAsync(builder.Build(), token);
         }
 
         public static async Task<IWorkPageResult<TEntity>> PageQueryAsync<TEntity>(this IDataRespository<TEntity> respository, int pageIndex, int pageSize, CancellationToken token = default)

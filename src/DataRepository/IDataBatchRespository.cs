@@ -16,13 +16,13 @@ namespace DataRepository
 
         Task<int> UpdateManyAsync(IEnumerable<TEntity> entities, CancellationToken token = default);
 
-        int UpdateInQuery(Expression expression);
+        int ExecuteUpdate(Expression expression);
 
-        Task<int> UpdateInQueryAsync(Expression expression, CancellationToken token = default);
+        Task<int> ExecuteUpdateAsync(Expression expression, CancellationToken token = default);
 
-        int DeleteInQuery();
+        int ExecuteDelete();
 
-        Task<int> DeleteInQueryAsync(CancellationToken token = default);
+        Task<int> ExecuteDeleteAsync(CancellationToken token = default);
 
         IUpdateSetBuilder<TEntity> CreateUpdateBuilder();
     }

@@ -15,11 +15,11 @@ namespace DataRepository.Test
         {
             var expression = Expression.Empty();
             studentDataBatchRespositoryMock.Setup(x => x.CreateUpdateBuilder()).Returns(studentUpdateSetBuilderMock.Object);
-            studentDataBatchRespositoryMock.Setup(x => x.UpdateInQuery(expression)).Returns(1);
+            studentDataBatchRespositoryMock.Setup(x => x.ExecuteUpdate(expression)).Returns(1);
             studentUpdateSetBuilderMock.Setup(x => x.Build()).Returns(expression);
             var hit = false;
 
-            var res = studentDataBatchRespositoryMock.Object.UpdateInQuery(b =>
+            var res = studentDataBatchRespositoryMock.Object.ExecuteUpdate(b =>
             {
                 b.Should().Be(studentUpdateSetBuilderMock.Object);
                 hit = true;
@@ -30,7 +30,7 @@ namespace DataRepository.Test
             studentUpdateSetBuilderMock.Verify(x => x.Build(), Times.Once());
             studentUpdateSetBuilderMock.VerifyNoOtherCalls();
             studentDataBatchRespositoryMock.Verify(x => x.CreateUpdateBuilder(), Times.Once());
-            studentDataBatchRespositoryMock.Verify(x => x.UpdateInQuery(expression), Times.Once());
+            studentDataBatchRespositoryMock.Verify(x => x.ExecuteUpdate(expression), Times.Once());
             studentDataBatchRespositoryMock.VerifyNoOtherCalls();
         }
 
@@ -39,11 +39,11 @@ namespace DataRepository.Test
         {
             var expression = Expression.Empty();
             studentDataBatchRespositoryMock.Setup(x => x.CreateUpdateBuilder()).Returns(studentUpdateSetBuilderMock.Object);
-            studentDataBatchRespositoryMock.Setup(x => x.UpdateInQueryAsync(expression, default)).ReturnsAsync(1);
+            studentDataBatchRespositoryMock.Setup(x => x.ExecuteUpdateAsync(expression, default)).ReturnsAsync(1);
             studentUpdateSetBuilderMock.Setup(x => x.Build()).Returns(expression);
             var hit = false;
 
-            var res = await studentDataBatchRespositoryMock.Object.UpdateInQueryAsync(b =>
+            var res = await studentDataBatchRespositoryMock.Object.ExecuteUpdateAsync(b =>
             {
                 b.Should().Be(studentUpdateSetBuilderMock.Object);
                 hit = true;
@@ -54,7 +54,7 @@ namespace DataRepository.Test
             studentUpdateSetBuilderMock.Verify(x => x.Build(), Times.Once());
             studentUpdateSetBuilderMock.VerifyNoOtherCalls();
             studentDataBatchRespositoryMock.Verify(x => x.CreateUpdateBuilder(), Times.Once());
-            studentDataBatchRespositoryMock.Verify(x => x.UpdateInQueryAsync(expression, default), Times.Once());
+            studentDataBatchRespositoryMock.Verify(x => x.ExecuteUpdateAsync(expression, default), Times.Once());
             studentDataBatchRespositoryMock.VerifyNoOtherCalls();
         }
 

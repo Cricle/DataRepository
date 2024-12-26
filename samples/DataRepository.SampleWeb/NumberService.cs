@@ -10,12 +10,12 @@ namespace DataRepository.SampleWeb
             => await respository.Where(x => x.Id == id).InsertAsync(new Number { Id = id, Value = value }) > 0;
 
         public async Task<WorkDataResult<bool>> UpdateAsync(int id, int value)
-            => await respository.Where(x => x.Id == id).UpdateInQueryAsync(x => x.Set(y => y.Value, value)) > 0;
+            => await respository.Where(x => x.Id == id).ExecuteUpdateAsync(x => x.SetProperty(y => y.Value, value)) > 0;
 
         public async Task<WorkDataResult<bool>> IncreaseAsync(int id, int value)
-            => await respository.Where(x => x.Id == id).UpdateInQueryAsync(x => x.Set(y => y.Value, y => y.Value + value)) > 0;
+            => await respository.Where(x => x.Id == id).ExecuteUpdateAsync(x => x.SetProperty(y => y.Value, y => y.Value + value)) > 0;
 
         public async Task<WorkDataResult<bool>> DeleteAsync(int id)
-            => await respository.Where(x => x.Id == id).DeleteInQueryAsync() > 0;
+            => await respository.Where(x => x.Id == id).ExecuteDeleteAsync() > 0;
     }
 }

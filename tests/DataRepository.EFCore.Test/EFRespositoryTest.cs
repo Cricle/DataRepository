@@ -316,7 +316,7 @@ namespace DataRepository.EFCore.Test
             sut.Context.Set<Student>().AddRange(students);
             sut.Context.SaveChanges();
             sut.Context.ChangeTracker.Clear();
-            var res = sut.Where(x => x.Name == students[1].Name).UpdateInQuery(x => x.Set(y => y.Hit, hit + 1));
+            var res = sut.Where(x => x.Name == students[1].Name).ExecuteUpdate(x => x.SetProperty(y => y.Hit, hit + 1));
 
             res.Should().Be(1);
             var data = await sut.Where(x => x.Name == students[1].Name).FirstOrDefaultAsync();
@@ -332,7 +332,7 @@ namespace DataRepository.EFCore.Test
             sut.Context.Set<Student>().AddRange(students);
             sut.Context.SaveChanges();
             sut.Context.ChangeTracker.Clear();
-            var res = await sut.Where(x => x.Name == students[1].Name).UpdateInQueryAsync(x => x.Set(y => y.Hit, hit + 1));
+            var res = await sut.Where(x => x.Name == students[1].Name).ExecuteUpdateAsync(x => x.SetProperty(y => y.Hit, hit + 1));
 
             res.Should().Be(1);
             var data = await sut.Where(x => x.Name == students[1].Name).FirstOrDefaultAsync();
@@ -348,7 +348,7 @@ namespace DataRepository.EFCore.Test
             sut.Context.Set<Student>().AddRange(students);
             sut.Context.SaveChanges();
             sut.Context.ChangeTracker.Clear();
-            var res = sut.Where(x => x.Name == students[1].Name).DeleteInQuery();
+            var res = sut.Where(x => x.Name == students[1].Name).ExecuteDelete();
 
             res.Should().Be(1);
             var data = await sut.Where(x => x.Name == students[1].Name).FirstOrDefaultAsync();
@@ -364,7 +364,7 @@ namespace DataRepository.EFCore.Test
             sut.Context.Set<Student>().AddRange(students);
             sut.Context.SaveChanges();
             sut.Context.ChangeTracker.Clear();
-            var res = await sut.Where(x => x.Name == students[1].Name).DeleteInQueryAsync();
+            var res = await sut.Where(x => x.Name == students[1].Name).ExecuteDeleteAsync();
 
             res.Should().Be(1);
             var data = await sut.Where(x => x.Name == students[1].Name).FirstOrDefaultAsync();
@@ -571,7 +571,7 @@ namespace DataRepository.EFCore.Test
             theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(students);
 
             var sut = GetSut();
-            var res = await sut.ByQuery(x => x.Take(1)).ToArrayAsync();
+            var res = await sut.By(x => x.Take(1)).ToArrayAsync();
 
             res.Should().BeEquivalentTo(students.Take(1).ToArray());
         }

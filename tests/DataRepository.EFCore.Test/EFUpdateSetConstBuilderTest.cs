@@ -11,7 +11,7 @@ namespace DataRepository.EFCore.Test
             Expression<Func<SetPropertyCalls<Student>, SetPropertyCalls<Student>>> exp = w => w.SetProperty(y => y.Hit, 1);
 
             var builder = new EFUpdateSetBuilder<Student>()
-                .Set(y => y.Hit, 1);
+                .SetProperty(y => y.Hit, 1);
             var actual = builder.Build();
 
             builder.SetCount.Should().Be(1);
@@ -24,8 +24,8 @@ namespace DataRepository.EFCore.Test
             Expression<Func<SetPropertyCalls<Student>, SetPropertyCalls<Student>>> exp = w => w.SetProperty(y => y.Hit, 1).SetProperty(y => y.Hit, y => y.Hit + 1);
 
             var builder = new EFUpdateSetBuilder<Student>()
-                .Set(x => x.Hit, 1)
-                .Set(x => x.Hit, x => x.Hit + 1);
+                .SetProperty(x => x.Hit, 1)
+                .SetProperty(x => x.Hit, x => x.Hit + 1);
             var actual = builder.Build();
 
             builder.SetCount.Should().Be(2);

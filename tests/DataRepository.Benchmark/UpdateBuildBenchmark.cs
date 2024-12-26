@@ -18,7 +18,7 @@ namespace DataRepository.Benchmark
         public void Builder()
         {
             new EFUpdateSetBuilder<Student>()
-                .Set(x => x.A, 1)
+                .SetProperty(x => x.A, 1)
                 .Build();
         }
 
@@ -32,12 +32,14 @@ namespace DataRepository.Benchmark
         public void BuilderExpression()
         {
             new EFUpdateSetBuilder<Student>()
-                .Set(x => x.A, x => x.A + 1)
+                .SetProperty(x => x.A, x => x.A + 1)
                 .Build();
         }
     }
     public class Student
     {
+        public string Name { get; set; }
+
         public int A { get; set; }
     }
 }

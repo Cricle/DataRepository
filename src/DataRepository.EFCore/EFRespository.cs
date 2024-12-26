@@ -7,6 +7,52 @@ using System.Linq.Expressions;
 
 namespace DataRepository.EFCore
 {
+    public sealed class EFDataRespositoryCreator<TContext> : IDataRespositoryCreator
+        where TContext : DbContext
+    {
+        public EFDataRespositoryCreator(IDbContextFactory<TContext> dbContextFactory)
+        {
+            DbContextFactory = dbContextFactory;
+        }
+
+        public IDbContextFactory<TContext> DbContextFactory { get; }
+
+        public IDataRespository<TEntity> Create<TEntity>() 
+            where TEntity : class
+        {
+            return new EFRespository<TEntity>(DbContextFactory.CreateDbContext());
+        }
+
+        public IDataRespositoryScope CreateScope()
+        {
+            return new EFDataRespositoryScope<TContext>(DbContextFactory.CreateDbContext());
+        }
+    }
+
+    public sealed class EFDataRespositoryScope<TContext> : IDataRespositoryScope
+        where TContext : DbContext
+    {
+        public EFDataRespositoryScope(TContext context)
+        {
+            Context = context;
+        }
+
+        public TContext Context { get; }
+
+        public IDataRespository<TEntity> Create<TEntity>() where TEntity : class
+        {
+            return new EFRespository<TEntity>(Context);
+        }
+
+        public void Dispose()
+        {
+            if (Context is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
+    }
+
     public class EFRespository<TEntity> : IDataRespository<TEntity>
         where TEntity : class
     {
@@ -127,16 +173,16 @@ namespace DataRepository.EFCore
             return await SaveChangesAsync(token);
         }
 
-        public int UpdateInQuery(Expression expression)
+        public int ExecuteUpdate(Expression expression)
             => query.ExecuteUpdate((Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>>)expression);
 
-        public Task<int> UpdateInQueryAsync(Expression expression, CancellationToken token = default)
+        public Task<int> ExecuteUpdateAsync(Expression expression, CancellationToken token = default)
             => query.ExecuteUpdateAsync((Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>>)expression, token);
 
-        public int DeleteInQuery()
+        public int ExecuteDelete()
           => query.ExecuteDelete();
 
-        public Task<int> DeleteInQueryAsync(CancellationToken token = default)
+        public Task<int> ExecuteDeleteAsync(CancellationToken token = default)
           => query.ExecuteDeleteAsync(token);
 
         public IDataRespository<TEntity> Where(Expression<Func<TEntity, bool>> expression) => new EFRespository<TEntity>(Context, query.Where(expression));
@@ -169,7 +215,7 @@ namespace DataRepository.EFCore
 
         public IDataRespository<TEntity> Take(int value) => new EFRespository<TEntity>(Context, query.Take(value));
 
-        public IDataRespository<TEntity> ByQuery(Func<IQueryable<TEntity>, IQueryable<TEntity>> func)
+        public IDataRespository<TEntity> By(Func<IQueryable<TEntity>, IQueryable<TEntity>> func)
             => new EFRespository<TEntity>(Context, func(query));
 
         #endregion
