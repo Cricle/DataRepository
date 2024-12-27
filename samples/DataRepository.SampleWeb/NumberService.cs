@@ -7,7 +7,7 @@ namespace DataRepository.SampleWeb
         public async Task<IWorkPageResult<Number>> PageAsync(int pageIndex, int pageSize) => await respository.PageQueryAsync(pageIndex, pageSize);
 
         public async Task<WorkDataResult<bool>> InsertAsync(int id, int value)
-            => await respository.Where(x => x.Id == id).InsertAsync(new Number { Id = id, Value = value }) > 0;
+            => await respository.InsertAsync(new Number { Id = id, Value = value }) > 0;
 
         public async Task<WorkDataResult<bool>> UpdateAsync(int id, int value)
             => await respository.Where(x => x.Id == id).ExecuteUpdateAsync(x => x.SetProperty(y => y.Value, value)) > 0;
