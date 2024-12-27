@@ -23,6 +23,7 @@ jobs:
         run: |
           choco install opencover.portable
           choco install codecov
+          
       - name: Create test report
         shell: powershell
         run: |
@@ -32,3 +33,8 @@ jobs:
         run: |
           codecov --version
           codecov -f "results.xml" -t "${{ secrets.CODECOV }}"
+      - name: Upload to codacy
+        shell: bash
+        run: |
+          export CODACY_PROJECT_TOKEN="${{ secrets.CODECOV }}";
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r results.xml
