@@ -7,52 +7,6 @@ using System.Linq.Expressions;
 
 namespace DataRepository.EFCore
 {
-    public sealed class EFDataRespositoryCreator<TContext> : IDataRespositoryCreator
-        where TContext : DbContext
-    {
-        public EFDataRespositoryCreator(IDbContextFactory<TContext> dbContextFactory)
-        {
-            DbContextFactory = dbContextFactory;
-        }
-
-        public IDbContextFactory<TContext> DbContextFactory { get; }
-
-        public IDataRespository<TEntity> Create<TEntity>() 
-            where TEntity : class
-        {
-            return new EFRespository<TEntity>(DbContextFactory.CreateDbContext());
-        }
-
-        public IDataRespositoryScope CreateScope()
-        {
-            return new EFDataRespositoryScope<TContext>(DbContextFactory.CreateDbContext());
-        }
-    }
-
-    public sealed class EFDataRespositoryScope<TContext> : IDataRespositoryScope
-        where TContext : DbContext
-    {
-        public EFDataRespositoryScope(TContext context)
-        {
-            Context = context;
-        }
-
-        public TContext Context { get; }
-
-        public IDataRespository<TEntity> Create<TEntity>() where TEntity : class
-        {
-            return new EFRespository<TEntity>(Context);
-        }
-
-        public void Dispose()
-        {
-            if (Context is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        }
-    }
-
     public class EFRespository<TEntity> : IDataRespository<TEntity>
         where TEntity : class
     {

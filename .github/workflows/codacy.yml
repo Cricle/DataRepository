@@ -22,7 +22,7 @@ jobs:
         shell: powershell
         run: |
           choco install opencover.portable
-          choco install codeco
+          choco install codecov
       - name: Create test report
         shell: powershell
         run: |
@@ -31,7 +31,7 @@ jobs:
         shell: powershell
         run: |
           codecov --version
-          codecov -f "results.xml" -t "${{ secrets.CODACY_PROJECT_TOKEN }}"
+          codecov -f "results.xml" -t "${{ secrets.CODECOV }}"
       - name: Upload to codacy
         shell: bash
         run: |
