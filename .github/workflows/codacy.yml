@@ -22,8 +22,7 @@ jobs:
         shell: powershell
         run: |
           choco install opencover.portable
-          choco install codecov
-          
+          choco install codeco
       - name: Create test report
         shell: powershell
         run: |
