@@ -58,7 +58,7 @@ public class NumberService(IDataRespository<Number> respository)
 
 NOTE: `ExecuteUpdateAsync`, `ExecuteUpdate`, `ExecuteDeleteAsync`, `ExecuteDelete` same as EFCore 8.0 Bulk update and delete, if the project use EFCore 8.0 or later, it would be used from EFCore raw method, otherwise use this class extensions methods
 
-### And you can use like DbContext
+### You can use like DbContext
 
 ```csharp
 IDataRespositoryScope scope = ...;//From DI
@@ -67,3 +67,7 @@ var students = scope.Create<Student>();//Return IDataRespository<Student>
 var teachers = scope.Create<Teacher>();//Return IDataRespository<Teacher>
 
 ```
+
+## Why do that
+
+In many times, the developer not need to know EFCore, only how to insert, update, delete, query, transation. Easy is the system design first, so know what you want.
