@@ -44,10 +44,7 @@ namespace DataRepository.EFCore
             return this;
         }
 
-        Expression IUpdateSetBuilder<TEntity>.Build()
-        {
-            return Build();
-        }
+        Expression IUpdateSetBuilder<TEntity>.Build() => Build();
 
         [ExcludeFromCodeCoverage]
         class EntityCache
