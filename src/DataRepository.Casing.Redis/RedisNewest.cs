@@ -11,8 +11,8 @@ namespace DataRepository.Casing.Redis
         private const string Script = """
             local time = tonumber(redis.call('hget', ARGV[1], 't'))
             local nowTime = tonumber(ARGV[2])
-            if time == nil or time < nowTime then            
-                redis.call('hset', ARGV[1],'t', ARGV[2],'v',ARGV[3])
+            if time == nil or time < nowTime then
+                redis.call('hset', ARGV[1], 't', ARGV[2], 'v', ARGV[3])
                 return 1
             end
             return 0
@@ -23,9 +23,9 @@ namespace DataRepository.Casing.Redis
         private LoadedLuaScript? scriptToken;
         private readonly IValuePublisher<T> valuePublisher;
 #if NET9_0_OR_GREATER
-        private readonly Lock locker = new Lock();
+        private readonly Lock locker = new ();
 #else
-        private readonly object locker = new object();
+        private readonly object locker = new ();
 #endif
 
         public RedisHashNewest(IConnectionMultiplexer connectionMultiplexer,
@@ -43,9 +43,7 @@ namespace DataRepository.Casing.Redis
 
         public async Task AddAsync(string key, NewestResult<T> result, CancellationToken token = default)
         {
-            await InitAsync(key, token);
-
-            var res = await PublishNewestAsync(key, result);
+            await PublishNewestAsync(key, result, token);
 
             await valuePublisher.PublishAsync(key, result.Value, token);
 
@@ -55,13 +53,7 @@ namespace DataRepository.Casing.Redis
 
         public async Task AddRangesAsync(string key, IEnumerable<NewestResult<T>> results, CancellationToken token = default)
         {
-            await InitAsync(key, token);
-
-            if (results.Any())
-            {
-                var newest = results.OrderByDescending(x => x.Time).FirstOrDefault();
-                var res = await PublishNewestAsync(key, newest);
-            }
+            await PublishNewestAsync(key, results.OrderByDescending(x => x.Time).FirstOrDefault(), token);
 
             await valuePublisher.PublishAsync(key, results.Select(x => x.Value), token);
 
@@ -69,9 +61,17 @@ namespace DataRepository.Casing.Redis
                 logger.LogDebug("Key - {key}, was publisheds {result}", key, results);
         }
 
-        private async Task<RedisResult> PublishNewestAsync(string key, NewestResult<T> result)
+        private async Task PublishNewestAsync(string key, NewestResult<T>? result, CancellationToken token = default)
         {
-            return await connectionMultiplexer.GetDatabase().ScriptEvaluateAsync(scriptToken!.Hash, null, [key, result.UnixTimeMilliseconds, Converter.Convert(result.Value)]);
+            await InitAsync(key, token);
+
+            if (result != null)
+            {
+                var res = await connectionMultiplexer.GetDatabase().ScriptEvaluateAsync(scriptToken!.Hash, null, [key, result.Value.UnixTimeMilliseconds, Converter.Convert(result.Value.Value)]);
+
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Script execute finished, result is {@result}", res);
+            }
         }
 
         public async Task<bool> ExistsAsync(string key, CancellationToken token = default)
@@ -109,11 +109,9 @@ namespace DataRepository.Casing.Redis
             if (scriptToken != null) return Task.CompletedTask;
             lock (locker)
             {
-                if (scriptToken == null)
-                {
-                    scriptToken = LuaScript.Prepare(Script).Load(connectionMultiplexer.GetServers()[0]);
-                }
+                scriptToken ??= LuaScript.Prepare(Script).Load(connectionMultiplexer.GetServers()[0]);
             }
+            logger.LogInformation("The script was inited with hash - {@hash}", scriptToken.Hash);
             return Task.CompletedTask;
         }
 
