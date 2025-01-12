@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DataRepository.SampleWeb
+namespace DataRepository.SampleWeb.Models
 {
     public class Number
     {

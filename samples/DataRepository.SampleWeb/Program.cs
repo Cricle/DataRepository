@@ -1,5 +1,7 @@
 using DataRepository.SampleWeb;
+using DataRepository.SampleWeb.Models;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 internal class Program
 {
@@ -13,7 +15,11 @@ internal class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddDbContext<NumberDbContext>(p => p.UseSqlite("Data source=a.db"));
+        builder.Services.AddSingleton<IConnectionMultiplexer>(p => ConnectionMultiplexer.Connect("127.0.0.1:6379"));
+
+        builder.Services.AddRedisNewest<GpsPosition, GpsPositionValuePublisher>();
+
+        builder.Services.AddDbContextFactory<NumberDbContext>(p => p.UseSqlite("Data source=a.db"));
         builder.Services.AddRespository<NumberDbContext>();
         builder.Services.AddScoped<NumberService>();
 

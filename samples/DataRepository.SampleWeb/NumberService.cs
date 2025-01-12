@@ -1,4 +1,5 @@
 ﻿using DataRepository.Models;
+using DataRepository.SampleWeb.Models;
 
 namespace DataRepository.SampleWeb
 {

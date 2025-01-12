@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\DataRepository.Casing.Redis\DataRepository.Casing.Redis.csproj" />
     <ProjectReference Include="..\..\src\DataRepository.EFCore.DependencyInjection\DataRepository.EFCore.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\src\DataRepository.EFCore\DataRepository.EFCore.csproj" />
     <ProjectReference Include="..\..\src\DataRepository\DataRepository.csproj" />
