@@ -31,6 +31,8 @@ namespace DataRepository.EFCore
 
         public IQueryProvider Provider => query.Provider;
 
+        public bool SupportDbConnection => true;
+
         public IQueryable CreateQuery(Expression expression) => Context.GetService<IAsyncQueryProvider>().CreateQuery(expression);
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => Context.GetService<IAsyncQueryProvider>().CreateQuery<TElement>(expression);
@@ -168,6 +170,8 @@ namespace DataRepository.EFCore
 
         public IDataRespository<TEntity> By(Func<IQueryable<TEntity>, IQueryable<TEntity>> func)
             => new EFRespository<TEntity>(Context, func(query));
+
+        public IDbConnection? GetConnection() => Context.Database.GetDbConnection();
 
         #endregion
     }

@@ -2,7 +2,13 @@
 
 namespace DataRepository
 {
-    public interface IDataRespository<TEntity> : IDataOperatorRespository<TEntity>, IDataBatchRespository<TEntity>, IQueryScope<TEntity>
+    public interface IDbConnectionProvider
+    {
+        bool SupportDbConnection { get; }
+
+        IDbConnection? GetConnection();
+    }
+    public interface IDataRespository<TEntity> : IDataOperatorRespository<TEntity>, IDataBatchRespository<TEntity>, IQueryScope<TEntity>, IDbConnectionProvider
            where TEntity : class
     {
         Task<IDataTransaction> BeginTransactionAsync(IsolationLevel level = IsolationLevel.ReadCommitted, CancellationToken token = default);
