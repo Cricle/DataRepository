@@ -1,4 +1,4 @@
-﻿namespace DataRepository.Casing.Redis
+﻿namespace DataRepository.Casing
 {
     public interface IValuePublisher<T>
     {
