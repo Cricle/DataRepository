@@ -11,7 +11,7 @@ namespace DataRepository.Benchmark
         private EFRespository<Student> students;
 
         [GlobalSetup]
-        public void Setup() 
+        public void Setup()
         {
             dbContext = new TheDbContext(new DbContextOptionsBuilder<TheDbContext>().UseSqlite("DataSource=file::memory:").Options);
             dbContext.Database.EnsureDeleted();
@@ -22,7 +22,7 @@ namespace DataRepository.Benchmark
             dbContext.ChangeTracker.Clear();
         }
 
-        [Benchmark(Baseline =true)]
+        [Benchmark(Baseline = true)]
         public async Task UpdateRaw()
         {
             await dbContext.Set<Student>().Where(x => x.Name == "a").ExecuteUpdateAsync(x => x.SetProperty(y => y.A, y => y.A + 1));

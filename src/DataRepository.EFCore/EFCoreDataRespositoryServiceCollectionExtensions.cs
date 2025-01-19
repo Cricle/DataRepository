@@ -3,7 +3,9 @@ using DataRepository.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
+#pragma warning disable IDE0130
 namespace Microsoft.Extensions.DependencyInjection
+#pragma warning restore IDE0130
 {
     public static class EFCoreDataRespositoryServiceCollectionExtensions
     {

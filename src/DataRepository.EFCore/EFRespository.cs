@@ -41,7 +41,7 @@ namespace DataRepository.EFCore
 
         public TResult Execute<TResult>(Expression expression) => Context.GetService<IAsyncQueryProvider>().Execute<TResult>(expression);
 
-        public async Task<IDataTransaction> BeginTransactionAsync(IsolationLevel level = IsolationLevel.ReadCommitted, CancellationToken token = default) 
+        public async Task<IDataTransaction> BeginTransactionAsync(IsolationLevel level = IsolationLevel.ReadCommitted, CancellationToken token = default)
             => new EFDataTransaction(await Context.Database.BeginTransactionAsync(level, token));
 
         #region Operator

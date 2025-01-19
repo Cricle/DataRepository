@@ -7,7 +7,7 @@ namespace DataRepository.Casing.Redis
     {
         private readonly JsonSerializerOptions options;
 
-        public JsonNewestValueConverter():this(JsonSerializerOptions.Default) { }
+        public JsonNewestValueConverter() : this(JsonSerializerOptions.Default) { }
 
         public JsonNewestValueConverter(JsonSerializerOptions options) => this.options = options ?? throw new ArgumentNullException(nameof(options));
 

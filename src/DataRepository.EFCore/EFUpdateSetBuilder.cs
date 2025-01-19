@@ -26,7 +26,7 @@ namespace DataRepository.EFCore
         {
             if (current == null)
                 throw new InvalidOperationException("Must at less one set");
-            
+
             return Expression.Lambda<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>>(current, paramter);
         }
 
@@ -51,7 +51,7 @@ namespace DataRepository.EFCore
         {
             private static readonly Type SetPropertyCallType = typeof(SetPropertyCalls<>).MakeGenericType(typeof(TEntity));
             private static readonly MethodInfo[] Methods = SetPropertyCallType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
-            
+
             public class PropertyCache<TProperty>
             {
 

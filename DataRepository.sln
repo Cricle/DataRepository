@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataRepository.Benchmark", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataRepository.SampleWeb", "samples\DataRepository.SampleWeb\DataRepository.SampleWeb.csproj", "{7AF33E7E-7011-4688-977F-2343D36BE70F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataRepository.EFCore.DependencyInjection", "src\DataRepository.EFCore.DependencyInjection\DataRepository.EFCore.DependencyInjection.csproj", "{C6DAE305-F6D3-4CC4-9B4B-A6A00731E604}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataRepository.Casing", "src\DataRepository.Casing\DataRepository.Casing.csproj", "{A2AD2B97-82C9-448A-9695-36F97E0B053C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataRepository.Casing.Redis", "src\DataRepository.Casing.Redis\DataRepository.Casing.Redis.csproj", "{83E888AF-C4D6-44B6-83F8-60C58EF0E032}"
@@ -57,10 +55,6 @@ Global
 		{7AF33E7E-7011-4688-977F-2343D36BE70F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7AF33E7E-7011-4688-977F-2343D36BE70F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7AF33E7E-7011-4688-977F-2343D36BE70F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C6DAE305-F6D3-4CC4-9B4B-A6A00731E604}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C6DAE305-F6D3-4CC4-9B4B-A6A00731E604}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C6DAE305-F6D3-4CC4-9B4B-A6A00731E604}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C6DAE305-F6D3-4CC4-9B4B-A6A00731E604}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A2AD2B97-82C9-448A-9695-36F97E0B053C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A2AD2B97-82C9-448A-9695-36F97E0B053C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2AD2B97-82C9-448A-9695-36F97E0B053C}.Release|Any CPU.ActiveCfg = Release|Any CPU

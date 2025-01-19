@@ -2,12 +2,6 @@
 
 namespace DataRepository
 {
-    public interface IDbConnectionProvider
-    {
-        bool SupportDbConnection { get; }
-
-        IDbConnection? GetConnection();
-    }
     public interface IDataRespository<TEntity> : IDataOperatorRespository<TEntity>, IDataBatchRespository<TEntity>, IQueryScope<TEntity>, IDbConnectionProvider
            where TEntity : class
     {

@@ -4,7 +4,7 @@ namespace DataRepository.Casing
 {
     public interface INewest<T>
     {
-        Task InitAsync(string key, CancellationToken token=default);
+        Task InitAsync(string key, CancellationToken token = default);
 
         Task SetAsync(string key, NewestResult<T> result, CancellationToken token);
 

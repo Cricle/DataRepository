@@ -6,9 +6,9 @@ namespace DataRepository.Casing.Redis
 {
     public class RedisHashNewest<T> : INewest<T>
     {
-        private const string TimeKey = "t";
-        private const string ValueKey = "v";
-        private const string Script = """
+        internal const string TimeKey = "t";
+        internal const string ValueKey = "v";
+        internal const string Script = """
             local time = tonumber(redis.call('hget', ARGV[1], 't'))
             local nowTime = tonumber(ARGV[2])
             if time == nil or time < nowTime then
@@ -20,12 +20,12 @@ namespace DataRepository.Casing.Redis
 
         private readonly IConnectionMultiplexer connectionMultiplexer;
         private readonly ILogger<RedisHashNewest<T>> logger;
-        private LoadedLuaScript? scriptToken;
+        internal LoadedLuaScript? scriptToken;
         private readonly IValuePublisher<T> valuePublisher;
 #if NET9_0_OR_GREATER
-        private readonly Lock locker = new ();
+        private readonly Lock locker = new();
 #else
-        private readonly object locker = new ();
+        private readonly object locker = new();
 #endif
 
         public RedisHashNewest(IConnectionMultiplexer connectionMultiplexer,
@@ -115,7 +115,7 @@ namespace DataRepository.Casing.Redis
             return Task.CompletedTask;
         }
 
-        public async Task SetAsync(string key, NewestResult<T> result, CancellationToken token)
+        public async Task SetAsync(string key, NewestResult<T> result, CancellationToken token = default)
         {
             await connectionMultiplexer.GetDatabase().HashSetAsync(key,
             [

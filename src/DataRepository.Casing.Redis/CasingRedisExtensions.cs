@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CasingRedisExtensions
     {
-        public static void AddRedisNewest<TModel, TPublisher>(this IServiceCollection services,JsonSerializerOptions? jsonSerializerOptions=null)
+        public static void AddRedisNewest<TModel, TPublisher>(this IServiceCollection services, JsonSerializerOptions? jsonSerializerOptions = null)
             where TPublisher : class, IValuePublisher<TModel>
         {
             services.AddSingleton<IValuePublisher<TModel>, TPublisher>();

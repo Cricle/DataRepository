@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
 using Moq.EntityFrameworkCore;
@@ -574,6 +575,26 @@ namespace DataRepository.EFCore.Test
             var res = await sut.By(x => x.Take(1)).ToArrayAsync();
 
             res.Should().BeEquivalentTo(students.Take(1).ToArray());
+        }
+
+        [Fact]
+        public void ShouldSupportDbConnection()
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(new List<Student>());
+
+            var sut = GetSut();
+
+            sut.SupportDbConnection.Should().BeTrue();
+        }
+
+        [Fact]
+        public void GetConnection_MustReutrnDbConneciton()
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(new List<Student>());
+
+            var sut = GetMemorySut();
+
+            sut.GetConnection().Should().BeOfType<SqliteConnection>();
         }
 
         private EFRespository<Student> GetSut() =>
