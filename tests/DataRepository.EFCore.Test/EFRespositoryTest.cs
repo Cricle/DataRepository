@@ -597,6 +597,17 @@ namespace DataRepository.EFCore.Test
             sut.GetConnection().Should().BeOfType<SqliteConnection>();
         }
 
+        [Fact]
+        public void ToString_MustBeQuery()
+        {
+            theDbContext.Setup(x => x.Set<Student>()).ReturnsDbSet(new List<Student>());
+
+            var sut = GetMemorySut();
+
+            var query = sut.Where(x => x.Hit > 2).Select(x => new { H = x.Hit + 1, Y = x.Name }).ToString();
+            query.Should().BeEquivalentTo("SELECT \"s\".\"Hit\" + 1 AS \"H\", \"s\".\"Name\" AS \"Y\"\r\nFROM \"Students\" AS \"s\"\r\nWHERE \"s\".\"Hit\" > 2");
+        }
+
         private EFRespository<Student> GetSut() =>
             new EFRespository<Student>(theDbContext.Object);
 

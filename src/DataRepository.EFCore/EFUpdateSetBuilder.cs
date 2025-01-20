@@ -16,11 +16,7 @@ namespace DataRepository.EFCore
 
         public Expression Instance => current ?? paramter;
 
-        public EFUpdateSetBuilder()
-        {
-            paramter = Expression.Parameter(typeof(SetPropertyCalls<TEntity>), "w");
-
-        }
+        public EFUpdateSetBuilder() => paramter = Expression.Parameter(typeof(SetPropertyCalls<TEntity>), "w");
 
         public Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> Build()
         {

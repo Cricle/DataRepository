@@ -1,4 +1,4 @@
-﻿using DataRepository.Casing.Redis;
+﻿using DataRepository.Casing;
 using DataRepository.SampleWeb.Models;
 
 namespace DataRepository.SampleWeb

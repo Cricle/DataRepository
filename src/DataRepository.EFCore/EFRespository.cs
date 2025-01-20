@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Collections;
 using System.Data;
+using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace DataRepository.EFCore
 {
+    [DebuggerDisplay("{ToString,nq}")]
     public class EFRespository<TEntity> : IDataRespository<TEntity>
         where TEntity : class
     {
@@ -174,5 +176,7 @@ namespace DataRepository.EFCore
         public IDbConnection? GetConnection() => Context.Database.GetDbConnection();
 
         #endregion
+
+        public override string ToString() => query.ToQueryString();
     }
 }
