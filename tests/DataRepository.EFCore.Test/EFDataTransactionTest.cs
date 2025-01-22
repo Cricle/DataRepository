@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
+using Moq;
+using System.Data;
 
 namespace DataRepository.EFCore.Test
 {
@@ -14,8 +16,18 @@ namespace DataRepository.EFCore.Test
             var sut = GetSut();
             await sut.CommitAsync();
 
-            dbContextTransactionMock.Verify(x => x.CommitAsync(default), Times.Once());
-            dbContextTransactionMock.VerifyNoOtherCalls();
+            dbContextTransactionMock.VerifyOnceNoOthersCall(x => x.CommitAsync(default));
+            sut.Transaction.Should().Be(dbContextTransactionMock.Object);
+            sut.TransactionId.Should().Be(dbContextTransactionMock.Object.TransactionId);
+        }
+
+        [Fact]
+        public void Commit_Commited()
+        {
+            var sut = GetSut();
+            sut.Commit();
+
+            dbContextTransactionMock.VerifyOnceNoOthersCall(x => x.Commit());
             sut.Transaction.Should().Be(dbContextTransactionMock.Object);
             sut.TransactionId.Should().Be(dbContextTransactionMock.Object.TransactionId);
         }
@@ -28,12 +40,36 @@ namespace DataRepository.EFCore.Test
             var sut = GetSut();
             await sut.RollbackAsync();
 
-            dbContextTransactionMock.Verify(x => x.RollbackAsync(default), Times.Once());
+            dbContextTransactionMock.VerifyOnceNoOthersCall(x => x.RollbackAsync(default));
+            sut.Transaction.Should().Be(dbContextTransactionMock.Object);
+            sut.TransactionId.Should().Be(dbContextTransactionMock.Object.TransactionId);
+        }
+
+        [Fact]
+        public void Rollback_Rollbacked()
+        {
+            var sut = GetSut();
+            sut.Rollback();
+
+            dbContextTransactionMock.VerifyOnceNoOthersCall(x => x.Rollback());
+            sut.Transaction.Should().Be(dbContextTransactionMock.Object);
+            sut.TransactionId.Should().Be(dbContextTransactionMock.Object.TransactionId);
+        }
+
+        [Fact]
+        public void Dispose_Disposed()
+        {
+            var sut = GetSut();
+            sut.Dispose();
+
+            ((IDbTransaction)sut).Connection.Should().BeNull();
+            sut.IsolationLevel.Should().Be(IsolationLevel.ReadCommitted);
+            dbContextTransactionMock.Verify(x => x.Dispose(), Times.Once());
             dbContextTransactionMock.VerifyNoOtherCalls();
             sut.Transaction.Should().Be(dbContextTransactionMock.Object);
             sut.TransactionId.Should().Be(dbContextTransactionMock.Object.TransactionId);
         }
 
-        private EFDataTransaction GetSut() => new EFDataTransaction(dbContextTransactionMock.Object);
+        private EFDataTransaction GetSut(IsolationLevel level = IsolationLevel.ReadCommitted) => new EFDataTransaction(dbContextTransactionMock.Object, level);
     }
 }

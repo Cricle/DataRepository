@@ -6,6 +6,6 @@ namespace DataRepository
     {
         bool SupportDbConnection { get; }
 
-        IDbConnection? GetConnection();
+        IDbConnection GetConnection();
     }
 }

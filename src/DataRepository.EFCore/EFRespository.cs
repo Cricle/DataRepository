@@ -44,7 +44,7 @@ namespace DataRepository.EFCore
         public TResult Execute<TResult>(Expression expression) => Context.GetService<IAsyncQueryProvider>().Execute<TResult>(expression);
 
         public async Task<IDataTransaction> BeginTransactionAsync(IsolationLevel level = IsolationLevel.ReadCommitted, CancellationToken token = default)
-            => new EFDataTransaction(await Context.Database.BeginTransactionAsync(level, token));
+            => new EFDataTransaction(await Context.Database.BeginTransactionAsync(level, token), level);
 
         #region Operator
 
@@ -173,7 +173,7 @@ namespace DataRepository.EFCore
         public IDataRespository<TEntity> By(Func<IQueryable<TEntity>, IQueryable<TEntity>> func)
             => new EFRespository<TEntity>(Context, func(query));
 
-        public IDbConnection? GetConnection() => Context.Database.GetDbConnection();
+        public IDbConnection GetConnection() => Context.Database.GetDbConnection();
 
         #endregion
 

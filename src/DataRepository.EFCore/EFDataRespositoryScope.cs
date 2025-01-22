@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace DataRepository.EFCore
 {
@@ -9,8 +10,12 @@ namespace DataRepository.EFCore
 
         public TContext Context { get; }
 
+        public bool SupportDbConnection => true;
+
         public IDataRespository<TEntity> Create<TEntity>() where TEntity : class => new EFRespository<TEntity>(Context);
 
         public void Dispose() => (Context as IDisposable)?.Dispose();
+
+        public IDbConnection GetConnection() => Context.Database.GetDbConnection();
     }
 }

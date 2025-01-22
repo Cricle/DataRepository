@@ -19,6 +19,16 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        public static IServiceCollection AddKeyRespository<TDbContext>(this IServiceCollection services, object? key, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
+            where TDbContext : DbContext
+        {
+            services.TryAddKeyedScoped<IDbContextStore, DbContextStore<TDbContext>>(key);
+            services.TryAddKeyedSingleton<IDataRespositoryCreator, EFDataRespositoryCreator<TDbContext>>(key);
+            services.TryAddKeyedScoped(key, (p, _) => p.GetRequiredService<EFDataRespositoryCreator<TDbContext>>().CreateScope());
+            services.TryAdd(ServiceDescriptor.DescribeKeyed(typeof(IDataRespository<>), key, typeof(DbContextEFRespository<>), serviceLifetime));
+            return services;
+        }
+
         internal interface IDbContextStore
         {
             DbContext DbContext { get; }
@@ -33,10 +43,6 @@ namespace Microsoft.Extensions.DependencyInjection
         internal sealed class DbContextEFRespository<TEntity> : EFRespository<TEntity> where TEntity : class
         {
             public DbContextEFRespository(IDbContextStore creator) : base(creator.DbContext)
-            {
-            }
-
-            public DbContextEFRespository(IDbContextStore creator, IQueryable<TEntity>? query) : base(creator.DbContext, query)
             {
             }
         }

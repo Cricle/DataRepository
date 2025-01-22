@@ -1,6 +1,6 @@
 ﻿namespace DataRepository
 {
-    public interface IDataRespositoryScope : IDisposable
+    public interface IDataRespositoryScope : IDbConnectionProvider, IDisposable
     {
         IDataRespository<TEntity> Create<TEntity>()
             where TEntity : class;

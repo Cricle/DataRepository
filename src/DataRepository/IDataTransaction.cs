@@ -1,6 +1,8 @@
-﻿namespace DataRepository
+﻿using System.Data;
+
+namespace DataRepository
 {
-    public interface IDataTransaction : IDisposable
+    public interface IDataTransaction : IDbTransaction
     {
         Guid TransactionId { get; }
 
