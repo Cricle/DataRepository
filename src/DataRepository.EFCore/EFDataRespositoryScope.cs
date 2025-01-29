@@ -14,7 +14,7 @@ namespace DataRepository.EFCore
 
         public IDataRespository<TEntity> Create<TEntity>() where TEntity : class => new EFRespository<TEntity>(Context);
 
-        public void Dispose() => (Context as IDisposable)?.Dispose();
+        public void Dispose() => Context.Dispose();
 
         public IDbConnection GetConnection() => Context.Database.GetDbConnection();
     }
