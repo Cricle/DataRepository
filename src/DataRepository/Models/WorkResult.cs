@@ -2,7 +2,7 @@
 {
     public class WorkResult : IWorkResult
     {
-        public static readonly WorkResult SucceedResult = new WorkResult(null);
+        public static readonly WorkResult SucceedResult = new(null);
 
         public WorkResult(Fail? fail) => Fail = fail;
 
@@ -10,9 +10,7 @@
 
         public bool Succeed => Fail == null;
 
-        public static implicit operator WorkResult(Fail? fail)
-        {
-            return fail == null ? SucceedResult : new WorkResult(fail);
-        }
+        public static implicit operator WorkResult(Fail? fail) 
+            => fail == null ? SucceedResult : new WorkResult(fail);
     }
 }

@@ -16,6 +16,6 @@ namespace DataRepository.Models
 
         public static Fail WithMsg(string? msg, int? code) => new(msg, code);
 
-        public static Fail WithMsg<T>(string? msg, T? code) where T : Enum => new(msg, Unsafe.As<T?, int>(ref code));
+        public static Fail WithMsg<T>(string? msg, T code) where T : Enum => new(msg, Unsafe.As<T, int>(ref code));
     }
 }

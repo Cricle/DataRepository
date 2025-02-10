@@ -11,14 +11,8 @@
 
         public T? Data { get; }
 
-        public static implicit operator WorkDataResult<T>(Fail fail)
-        {
-            return new WorkDataResult<T>(fail);
-        }
+        public static implicit operator WorkDataResult<T>(Fail fail) => new WorkDataResult<T>(fail);
 
-        public static implicit operator WorkDataResult<T>(T? data)
-        {
-            return new WorkDataResult<T>(data);
-        }
+        public static implicit operator WorkDataResult<T>(T? data) => new WorkDataResult<T>(data);
     }
 }
