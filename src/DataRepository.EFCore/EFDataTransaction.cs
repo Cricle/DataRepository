@@ -21,6 +21,8 @@ namespace DataRepository.EFCore
 
         public IsolationLevel IsolationLevel { get; }
 
+        IDbTransaction? IDataTransaction.Transaction => Transaction.GetDbTransaction();
+
         public void Commit() => Transaction.Commit();
 
         public Task CommitAsync(CancellationToken cancellationToken = default) => Transaction.CommitAsync(cancellationToken);

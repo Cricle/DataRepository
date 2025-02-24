@@ -6,6 +6,8 @@ namespace DataRepository
     {
         Guid TransactionId { get; }
 
+        IDbTransaction? Transaction { get; }
+
         Task CommitAsync(CancellationToken cancellationToken = default);
 
         Task RollbackAsync(CancellationToken cancellationToken = default);
