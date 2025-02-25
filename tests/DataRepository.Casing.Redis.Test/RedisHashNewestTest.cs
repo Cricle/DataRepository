@@ -10,46 +10,46 @@ namespace DataRepository.Casing.Redis.Test
         private readonly Mock<IDatabase> databaseMock = new();
         private readonly Mock<IServer> serverMock = new();
         private readonly Mock<INewestValueConverter<Student>> newestValueConverterMock = new();
-        private readonly Mock<ILogger<RedisHashNewest<Student>>> loggerMock = new();
+        private readonly Mock<ILogger<RedisHashCasingNewest<Student>>> loggerMock = new();
         private readonly Mock<IValuePublisher<Student>> valuePublisherMock = new();
 
         [Fact]
         public void GivenNull_MustThrowArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new RedisHashNewest<Student>(null!, newestValueConverterMock.Object, loggerMock.Object, valuePublisherMock.Object));
-            Assert.Throws<ArgumentNullException>(() => new RedisHashNewest<Student>(connectionMultiplexerMock.Object, null!, loggerMock.Object, valuePublisherMock.Object));
-            Assert.Throws<ArgumentNullException>(() => new RedisHashNewest<Student>(connectionMultiplexerMock.Object, newestValueConverterMock.Object, null!, valuePublisherMock.Object));
-            Assert.Throws<ArgumentNullException>(() => new RedisHashNewest<Student>(connectionMultiplexerMock.Object, newestValueConverterMock.Object, loggerMock.Object, null!));
+            Assert.Throws<ArgumentNullException>(() => new RedisHashCasingNewest<Student>(null!, newestValueConverterMock.Object, loggerMock.Object, valuePublisherMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new RedisHashCasingNewest<Student>(connectionMultiplexerMock.Object, null!, loggerMock.Object, valuePublisherMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new RedisHashCasingNewest<Student>(connectionMultiplexerMock.Object, newestValueConverterMock.Object, null!, valuePublisherMock.Object));
+            Assert.Throws<ArgumentNullException>(() => new RedisHashCasingNewest<Student>(connectionMultiplexerMock.Object, newestValueConverterMock.Object, loggerMock.Object, null!));
         }
 
-        [Theory, AutoData]
-        public async Task Init_MustCallScriptLoad(string key)
+        [Fact]
+        public async Task Init_MustCallScriptLoad()
         {
 
             var sut = GetSut();
-            await sut.InitAsync(key, default);
+            await sut.InitAsync();
 
             sut.scriptToken.Should().NotBeNull();
             connectionMultiplexerMock.VerifyOnceNoOthersCall(x => x.GetServers());
-            serverMock.VerifyOnceNoOthersCall(x => x.ScriptLoad(RedisHashNewest<Student>.Script, CommandFlags.None));
+            serverMock.VerifyOnceNoOthersCall(x => x.ScriptLoad(sut.GetScript(), CommandFlags.None));
         }
 
-        [Theory, AutoData]
-        public async Task Init_Mulity_OnlyOneCall(string key)
+        [Fact]
+        public async Task Init_Mulity_OnlyOneCall()
         {
 
             var sut = GetSut();
-            await sut.InitAsync(key, default);
+            await sut.InitAsync();
             var token = sut.scriptToken;
-            await sut.InitAsync(key, default);
+            await sut.InitAsync();
 
             sut.scriptToken.Should().BeEquivalentTo(token);
             connectionMultiplexerMock.VerifyOnceNoOthersCall(x => x.GetServers());
-            serverMock.VerifyOnceNoOthersCall(x => x.ScriptLoad(RedisHashNewest<Student>.Script, CommandFlags.None));
+            serverMock.VerifyOnceNoOthersCall(x => x.ScriptLoad(sut.GetScript(), CommandFlags.None));
         }
 
         [Theory, AutoData]
-        public async Task SetAsync_MustBeSetInRedis(string key, string convertValue, NewestResult<Student> newestResult)
+        public async Task SetAsync_MustBeSetInRedis(string key, string convertValue, TimedResult<Student> newestResult)
         {
             RedisValue value = convertValue;
             newestValueConverterMock.Setup(x => x.Convert(newestResult.Value)).Returns(value);
@@ -74,11 +74,11 @@ namespace DataRepository.Casing.Redis.Test
             connectionMultiplexerMock.VerifyOnceNoOthersCall(x => x.GetDatabase(-1, null).KeyExistsAsync(key, CommandFlags.None));
         }
 
-        private RedisHashNewest<Student> GetSut()
+        private RedisHashCasingNewest<Student> GetSut()
         {
             connectionMultiplexerMock.Setup(x => x.GetDatabase(-1, null)).Returns(databaseMock.Object);
             connectionMultiplexerMock.Setup(x => x.GetServers()).Returns([serverMock.Object]);
-            return new RedisHashNewest<Student>(connectionMultiplexerMock.Object, newestValueConverterMock.Object, loggerMock.Object, valuePublisherMock.Object); ;
+            return new RedisHashCasingNewest<Student>(connectionMultiplexerMock.Object, newestValueConverterMock.Object, loggerMock.Object, valuePublisherMock.Object); ;
         }
     }
 }

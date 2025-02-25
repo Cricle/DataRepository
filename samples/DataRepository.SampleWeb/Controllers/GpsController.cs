@@ -9,9 +9,9 @@ namespace DataRepository.SampleWeb.Controllers
     [Route("[controller]/[action]")]
     public class GpsController : ControllerBase
     {
-        private readonly INewest<GpsPosition> positionNewest;
+        private readonly ICasingNewest<GpsPosition> positionNewest;
 
-        public GpsController(INewest<GpsPosition> positionNewest)
+        public GpsController(ICasingNewest<GpsPosition> positionNewest)
         {
             this.positionNewest = positionNewest;
         }
@@ -25,7 +25,7 @@ namespace DataRepository.SampleWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromQuery] string key, [FromBody] GpsPosition position)
         {
-            await positionNewest.AddAsync(key, new NewestResult<GpsPosition>(position.Time, position));
+            await positionNewest.AddAsync(key, new TimedResult<GpsPosition>(position.Time, position));
             return Ok();
         }
     }
