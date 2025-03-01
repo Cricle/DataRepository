@@ -28,7 +28,8 @@ namespace DataRepository.EFCore
 
         public IUpdateSetBuilder<TEntity> SetProperty<TProperty>(Expression<Func<TEntity, TProperty>> selector, TProperty value)
         {
-            current = Expression.Call(Instance, EntityCache.PropertyCache<TProperty>.SetPropertyMethod, selector, Expression.Constant(value));
+            var exp = Expression.Convert(Expression.Constant(value), typeof(TProperty));
+            current = Expression.Call(Instance, EntityCache.PropertyCache<TProperty>.SetPropertyMethod, selector, exp);
             setCount++;
             return this;
         }

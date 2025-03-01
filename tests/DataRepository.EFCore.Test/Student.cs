@@ -8,5 +8,7 @@ namespace DataRepository.EFCore.Test
         public string? Name { get; set; }
 
         public int Hit { get; set; }
+
+        public DateTime? Date { get; set; }
     }
 }

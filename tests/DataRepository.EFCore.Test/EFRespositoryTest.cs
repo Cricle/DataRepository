@@ -407,6 +407,20 @@ namespace DataRepository.EFCore.Test
         }
 
         [Theory, AutoData]
+        public async Task UpdateWithNullable_MustOk(Student student)
+        {
+            var sut = GetMemorySut();
+            sut.Context.Set<Student>().Add(student);
+            sut.Context.SaveChanges();
+            sut.Context.ChangeTracker.Clear();
+
+            var now = DateTime.UtcNow;
+            await sut.Where(x => x.Name == student.Name).ExecuteUpdateAsync(x => x.SetProperty(y => y.Date, now));
+            var exp = sut.Where(x => x.Name == student.Name).First();
+            exp.Date.Should().Be(now);
+        }
+
+        [Theory, AutoData]
         public void Select_MustProjectColumn(Student student)
         {
             var sut = GetMemorySut();
