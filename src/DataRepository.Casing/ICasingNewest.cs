@@ -2,10 +2,11 @@
 
 namespace DataRepository.Casing
 {
-    public interface ICasingNewest<T> : IOverlayCalculation<TimedResult<T>, T>
+    public interface ICasingNewest<T> : IOverlayCalculation<T>
+        where T : ITimedValue
     {
-        Task SetAsync(string key, TimedResult<T> result, CancellationToken token = default);
+        Task SetAsync(string key, T result, CancellationToken token = default);
 
-        Task<TimedResult<T>?> GetAsync(string key, CancellationToken token = default);
+        Task<T?> GetAsync(string key, CancellationToken token = default);
     }
 }

@@ -20,8 +20,8 @@ namespace DataRepository.Casing.Redis
 
         protected RedisLuaScripter(IConnectionMultiplexer connectionMultiplexer, ILogger logger)
         {
-            this.connectionMultiplexer = connectionMultiplexer;
-            this.logger = logger;
+            this.connectionMultiplexer = connectionMultiplexer ?? throw new ArgumentNullException(nameof(connectionMultiplexer));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public LoadedLuaScript? GetLoadedLuaScript() => scriptToken;

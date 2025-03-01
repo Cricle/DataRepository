@@ -1,6 +1,8 @@
-﻿namespace DataRepository.SampleWeb.Models
+﻿using DataRepository.Casing.Models;
+
+namespace DataRepository.SampleWeb.Models
 {
-    public class GpsPosition
+    public class GpsPosition : ITimedValue
     {
         public string DeviceId { get; set; } = null!;
 
@@ -9,5 +11,7 @@
         public double Lat { get; set; }
 
         public double Lon { get; set; }
+
+        public DateTime GetTime() => Time;
     }
 }

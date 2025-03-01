@@ -1,3 +1,4 @@
+using DataRepository.Casing.Redis;
 using DataRepository.SampleWeb;
 using DataRepository.SampleWeb.Models;
 using Microsoft.EntityFrameworkCore;
@@ -17,11 +18,19 @@ internal class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddSingleton<IConnectionMultiplexer>(p => ConnectionMultiplexer.Connect("127.0.0.1:6379"));
 
-        builder.Services.AddRedisNewest<GpsPosition, GpsPositionValuePublisher>();
+        builder.Services.AddRedisCasting(typeof(ValuePublisher<>))
+            .AddRedisNewest(new RedisHashCasingNewestConfig("test:newest:"))
+            .AddRedisTopN(new RedisSortSetTopNConfig("test:topn:") { StoreSize = 100 });
+
+        builder.Services.AddCasting<GpsPosition>(b =>
+        {
+            b.AddTopN().AddNewest();
+        });
 
         builder.Services.AddDbContextFactory<NumberDbContext>(p => p.UseSqlite("Data source=a.db"));
         builder.Services.AddRespository<NumberDbContext>();
         builder.Services.AddScoped<NumberService>();
+        builder.Services.AddSingleton<NumberCalc>();
 
         var app = builder.Build();
 

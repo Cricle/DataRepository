@@ -4,40 +4,52 @@ using StackExchange.Redis;
 
 namespace DataRepository.Casing.Redis
 {
-    public class RedisHashCasingNewest<T> : RedisOverlayCalculation<TimedResult<T>, T>, ICasingNewest<T>
+    public class RedisHashCasingNewest<T> : RedisOverlayCalculation<T>, ICasingNewest<T>
+        where T : ITimedValue
     {
         internal const string TimeKey = "t";
         internal const string ValueKey = "v";
 
-        public RedisHashCasingNewest(IConnectionMultiplexer connectionMultiplexer,
+        private readonly RedisHashCasingNewestConfig newestConfig;
+
+        public RedisHashCasingNewest(RedisHashCasingNewestConfig newestConfig,
+            IConnectionMultiplexer connectionMultiplexer,
             INewestValueConverter<T> converter,
-            ILogger<RedisHashCasingNewest<T>> logger,
-            IValuePublisher<T> valuePublisher)
-            : base(connectionMultiplexer, logger, valuePublisher)
+            ILogger<RedisHashCasingNewest<T>> logger)
+            : base(connectionMultiplexer, logger)
         {
+            this.newestConfig = newestConfig ?? throw new ArgumentNullException(nameof(newestConfig));
             Converter = converter ?? throw new ArgumentNullException(nameof(converter));
         }
 
         public INewestValueConverter<T> Converter { get; }
 
-        protected override Task OnAddAsync(string key, TimedResult<T> result, CancellationToken token = default)
+        protected override Task OnAddAsync(string key, T result, CancellationToken token = default)
         {
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("Key - {key}, was published {result}", key, result);
             return Task.CompletedTask;
         }
 
-        protected override async Task OverlayNewValuesAsync(string key, TimedResult<T> result, CancellationToken token = default)
-            => await ScriptEvaluateAsync(null, [key, result.UnixTimeMilliseconds, Converter.Convert(result.Value)], CommandFlags.None);
-
-        protected override async Task OverlayNewValuesAsync(string key, IEnumerable<TimedResult<T>> results, CancellationToken token = default)
-            => await OverlayNewValuesAsync(key, results.OrderByDescending(x => x.Time).First(), token);
-
-        public async Task<TimedResult<T>?> GetAsync(string key, CancellationToken token = default)
+        private static long GetUnixTimeMilliseconds(DateTime time)
         {
-            var sets = await connectionMultiplexer.GetDatabase().HashGetAllAsync(key);
+            return new DateTimeOffset(time.ToUniversalTime()).ToUnixTimeMilliseconds();
+        }
+
+        protected override async Task OverlayNewValuesAsync(string key, T result, CancellationToken token = default)
+            => await ScriptEvaluateAsync(null, [GetKey(key), GetUnixTimeMilliseconds(result.GetTime()), Converter.Convert(result)], CommandFlags.None);
+
+        protected override async Task OverlayNewValuesAsync(string key, IEnumerable<T> results, CancellationToken token = default)
+        {
+            if (!results.Any()) return;
+            await OverlayNewValuesAsync(key, results.OrderByDescending(x => GetUnixTimeMilliseconds(x.GetTime())).First(), token);
+        }
+
+        public async Task<T?> GetAsync(string key, CancellationToken token = default)
+        {
+            var sets = await connectionMultiplexer.GetDatabase().HashGetAllAsync(GetKey(key));
             if (sets.Length == 0)
-                return null;
+                return default;
 
             var hitCount = 0;
             DateTime? time = null;
@@ -56,16 +68,16 @@ namespace DataRepository.Casing.Redis
                 }
             }
 
-            if (hitCount < 2) return null;
-            return new TimedResult<T>(time!.Value, value!);
+            if (hitCount < 2) return default;
+            return value;
         }
 
-        public async Task SetAsync(string key, TimedResult<T> result, CancellationToken token = default)
+        public async Task SetAsync(string key, T result, CancellationToken token = default)
         {
-            await connectionMultiplexer.GetDatabase().HashSetAsync(key,
+            await connectionMultiplexer.GetDatabase().HashSetAsync(GetKey(key),
             [
-                new HashEntry(TimeKey,result.UnixTimeMilliseconds),
-                new HashEntry(ValueKey,Converter.Convert(result.Value))
+                new HashEntry(TimeKey,GetUnixTimeMilliseconds(result.GetTime())),
+                new HashEntry(ValueKey,Converter.Convert(result))
             ]);
 
             logger.LogInformation("Key - {key}, was setted {result}", key, result);
@@ -84,6 +96,9 @@ namespace DataRepository.Casing.Redis
             """;
         }
 
-        protected override T ToValue(TimedResult<T> value) => value.Value;
+        public override async Task<long> CountAsync(string key, CancellationToken token = default)
+            => await ExistsAsync(key, token) ? 1L : 0L;
+
+        protected override string GetKey(string key) => $"{newestConfig.Prefx}{key}";
     }
 }

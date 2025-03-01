@@ -7,20 +7,45 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CasingRedisExtensions
     {
-        public static void AddRedisNewest<TModel, TPublisher>(this IServiceCollection services, JsonSerializerOptions? jsonSerializerOptions = null)
-            where TPublisher : class, IValuePublisher<TModel>
+        public static IServiceCollection AddRedisCasting(this IServiceCollection services, Type valuePublisherType, JsonSerializerOptions? jsonSerializerOptions = null)
         {
-            services.TryAddSingleton<IValuePublisher<TModel>, TPublisher>();
-            services.TryAddSingleton<ICasingNewest<TModel>, RedisHashCasingNewest<TModel>>();
-            services.TryAddSingleton<INewestValueConverter<TModel>>(new JsonNewestValueConverter<TModel>(jsonSerializerOptions ?? JsonSerializerOptions.Default));
+            services.TryAdd(ServiceDescriptor.Describe(typeof(IValuePublisher<>), valuePublisherType, ServiceLifetime.Singleton));
+            services.TryAdd(ServiceDescriptor.Describe(typeof(ICasingNewest<>), typeof(RedisHashCasingNewest<>), ServiceLifetime.Singleton));
+            services.TryAdd(ServiceDescriptor.Describe(typeof(INewestValueConverter<>), typeof(DIJsonNewestValueConverter<>), ServiceLifetime.Singleton));
+            services.TryAddSingleton(new JsonOptionsBox(jsonSerializerOptions ?? JsonSerializerOptions.Default));
+            return services;
         }
 
-        public static void AddRedisTopN<TModel, TPublisher>(this IServiceCollection services, JsonSerializerOptions? jsonSerializerOptions = null)
-           where TPublisher : class, IValuePublisher<TModel>
+        public static IServiceCollection AddRedisNewest(this IServiceCollection services,RedisHashCasingNewestConfig newestConfig)
         {
-            services.TryAddSingleton<IValuePublisher<TModel>, TPublisher>();
-            services.TryAddSingleton<ICasingNewest<TModel>, RedisHashCasingNewest<TModel>>();
-            services.TryAddSingleton<INewestValueConverter<TModel>>(new JsonNewestValueConverter<TModel>(jsonSerializerOptions ?? JsonSerializerOptions.Default));
+            services.TryAdd(ServiceDescriptor.Describe(typeof(ICasingNewest<>), typeof(RedisHashCasingNewest<>), ServiceLifetime.Singleton));
+            services.TryAddSingleton(newestConfig);
+            return services;
+        }
+
+        public static IServiceCollection AddRedisTopN(this IServiceCollection services, RedisSortSetTopNConfig topNConfig)
+        {
+            services.TryAdd(ServiceDescriptor.Describe(typeof(ITopN<>), typeof(RedisSortSetTopN<>), ServiceLifetime.Singleton));
+            services.TryAddSingleton(topNConfig);
+            return services;
+        }
+
+        internal sealed class JsonOptionsBox
+        {
+            public JsonOptionsBox(JsonSerializerOptions jsonSerializerOptions)
+            {
+                JsonSerializerOptions = jsonSerializerOptions;
+            }
+
+            public JsonSerializerOptions JsonSerializerOptions { get; }
+        }
+
+        internal sealed class DIJsonNewestValueConverter<TModel> : JsonNewestValueConverter<TModel>
+        {
+            public DIJsonNewestValueConverter(JsonOptionsBox box) 
+                : base(box.JsonSerializerOptions)
+            {
+            }
         }
     }
 }

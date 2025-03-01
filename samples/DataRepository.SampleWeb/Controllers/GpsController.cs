@@ -9,23 +9,29 @@ namespace DataRepository.SampleWeb.Controllers
     [Route("[controller]/[action]")]
     public class GpsController : ControllerBase
     {
-        private readonly ICasingNewest<GpsPosition> positionNewest;
+        private readonly NumberCalc numberCalc;
 
-        public GpsController(ICasingNewest<GpsPosition> positionNewest)
+        public GpsController(NumberCalc numberCalc)
         {
-            this.positionNewest = positionNewest;
+            this.numberCalc = numberCalc;
         }
 
         [HttpGet]
         public async Task<IActionResult> Newest([FromQuery] string key)
         {
-            return Ok(await positionNewest.GetAsync(key));
+            return Ok(await numberCalc.NewestAsync(key));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TopN([FromQuery] string key)
+        {
+            return Ok(await numberCalc.TopNAsync(key));
         }
 
         [HttpPost]
         public async Task<IActionResult> Add([FromQuery] string key, [FromBody] GpsPosition position)
         {
-            await positionNewest.AddAsync(key, new TimedResult<GpsPosition>(position.Time, position));
+            await numberCalc.AddAsync(position);
             return Ok();
         }
     }

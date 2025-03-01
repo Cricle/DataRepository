@@ -2,10 +2,9 @@
 
 namespace DataRepository.Casing
 {
-    public interface ITopN<T> : IOverlayCalculation<TimedResult<T>, T>
+    public interface ITopN<T> : IOverlayCalculation<T>
+        where T : ITimedValue
     {
-        Task<long> CountAsync(string key, CancellationToken token = default);
-
-        Task<IList<T>> GetRangeAsync(string key, long? skip, long? take, bool asc, CancellationToken token = default);
+        Task<IList<T>> GetRangeAsync(string key, long? skip = null, long? take = null, bool asc = false, CancellationToken token = default);
     }
 }
