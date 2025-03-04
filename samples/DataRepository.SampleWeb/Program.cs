@@ -22,10 +22,7 @@ internal class Program
             .AddRedisNewest(new RedisHashCasingNewestConfig("test:newest:"))
             .AddRedisTopN(new RedisSortSetTopNConfig("test:topn:") { StoreSize = 100 });
 
-        builder.Services.AddCasting<GpsPosition>(b =>
-        {
-            b.AddTopN().AddNewest();
-        });
+        builder.Services.AddCasting<GpsPosition>(b => b.AddTopN().AddNewest());
 
         builder.Services.AddDbContextFactory<NumberDbContext>(p => p.UseSqlite("Data source=a.db"));
         builder.Services.AddRespository<NumberDbContext>();

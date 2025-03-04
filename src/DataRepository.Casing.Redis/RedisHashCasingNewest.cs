@@ -24,13 +24,6 @@ namespace DataRepository.Casing.Redis
 
         public INewestValueConverter<T> Converter { get; }
 
-        protected override Task OnAddAsync(string key, T result, CancellationToken token = default)
-        {
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Key - {key}, was published {result}", key, result);
-            return Task.CompletedTask;
-        }
-
         private static long GetUnixTimeMilliseconds(DateTime time)
         {
             return new DateTimeOffset(time.ToUniversalTime()).ToUnixTimeMilliseconds();
@@ -48,28 +41,14 @@ namespace DataRepository.Casing.Redis
         public async Task<T?> GetAsync(string key, CancellationToken token = default)
         {
             var sets = await connectionMultiplexer.GetDatabase().HashGetAllAsync(GetKey(key));
-            if (sets.Length == 0)
-                return default;
+            if (sets.Length == 0) return default;
 
-            var hitCount = 0;
-            DateTime? time = null;
-            T? value = default;
             foreach (var set in sets)
             {
-                if (set.Name == TimeKey)
-                {
-                    time = DateTimeOffset.FromUnixTimeMilliseconds((long)set.Value).DateTime;
-                    hitCount++;
-                }
-                else if (set.Name == ValueKey)
-                {
-                    value = Converter.ConvertBack(set.Value);
-                    hitCount++;
-                }
+                if (set.Name == ValueKey) return Converter.ConvertBack(set.Value);
             }
 
-            if (hitCount < 2) return default;
-            return value;
+            return default;
         }
 
         public async Task SetAsync(string key, T result, CancellationToken token = default)

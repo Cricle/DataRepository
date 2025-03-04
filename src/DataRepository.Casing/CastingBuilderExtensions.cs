@@ -30,10 +30,8 @@ namespace Microsoft.Extensions.DependencyInjection
         public static T? FindCalculation<T, TValue>(this IOverlayCalculation<TValue> calculation)
             where T : IOverlayCalculation<TValue>
         {
-            if (calculation is T result)
-            {
-                return result;
-            }
+            if (calculation is T result) return result;
+
             if (calculation is IEnumerable<IOverlayCalculation<TValue>> results)
             {
                 foreach (var item in results)

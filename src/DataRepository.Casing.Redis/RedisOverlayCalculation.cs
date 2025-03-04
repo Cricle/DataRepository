@@ -17,10 +17,7 @@ namespace DataRepository.Casing.Redis
             await OnAddAsync(key, result, token).ConfigureAwait(false);
         }
 
-        protected virtual Task OnAddAsync(string key, TValue result, CancellationToken token = default)
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task OnAddAsync(string key, TValue result, CancellationToken token = default) => Task.CompletedTask;
 
         public async Task AddRangesAsync(string key, IEnumerable<TValue> results, CancellationToken token = default)
         {
@@ -30,10 +27,7 @@ namespace DataRepository.Casing.Redis
             await OnAddRangesAsync(key, results, token).ConfigureAwait(false);
         }
 
-        protected virtual Task OnAddRangesAsync(string key, IEnumerable<TValue> results, CancellationToken token = default)
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task OnAddRangesAsync(string key, IEnumerable<TValue> results, CancellationToken token = default) => Task.CompletedTask;
 
         public virtual async Task DeleteAsync(string key, CancellationToken token = default)
             => await connectionMultiplexer.GetDatabase().KeyDeleteAsync(GetKey(key));
