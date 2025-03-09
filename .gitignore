@@ -484,3 +484,4 @@ $RECYCLE.BIN/
 *.swp
 /samples/DataRepository.SampleWeb/a.*
 /results.xml
+/samples/DataRespository.MasstransitSample/a.*
