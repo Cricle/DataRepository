@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>$(TargetFrameworks);netstandard2.1;netstandard2.0;</TargetFrameworks>
+		<LangVersion>latest</LangVersion>
+		<AssemblyName>DDataRepository.Masstransit</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="MassTransit.Abstractions" Version="8.3.7" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\DataRepository.Casing\DataRepository.Casing.csproj" />
+	  <ProjectReference Include="..\DataRepository\DataRepository.csproj" />
+	</ItemGroup>
+</Project>
