@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AssemblyName>DDataRepository.Bus.Serialization.MemoryPack</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="MemoryPack" Version="1.21.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\DataRepository.Bus\DataRepository.Bus.csproj" />
+	</ItemGroup>
+
+</Project>
