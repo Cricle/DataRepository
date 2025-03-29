@@ -1,62 +1,39 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 
 namespace DataRepository.Bus.InMemory
 {
-    internal sealed class InMemoryRequestReplyDispatcher : IRequestReplyDispatcher
+    internal sealed class InMemoryRequestReplyDispatcher : RequestReplyDispatcherBase<RequestReplyBox>
     {
-        public InMemoryRequestReplyDispatcher(InMemoryRequestReplyIdentity identity,ILogger logger)
+        public InMemoryRequestReplyDispatcher(InMemoryRequestReplyIdentity identity, ILogger logger) : base(logger)
         {
             Identity = identity;
             Channel = identity.CreateChannel<RequestReplyBox>();
             Logger = logger;
         }
 
-        public InMemoryRequestReplyIdentity Identity { get; }
+        public override IRequestReplyIdentity Identity { get; }
 
-        public Channel<RequestReplyBox> Channel{ get; }
+        public Channel<RequestReplyBox> Channel { get; }
 
         public ILogger Logger { get; }
 
-        IRequestReplyIdentity IDataDispatcher<IRequestReplyIdentity, IRequestReply>.Identity => Identity;
-
-        public async Task LoopReceiveAsync(IRequestReply context, CancellationToken token = default)
+        protected override ValueTask HandleExceptionAsync(RequestReplyBox? outbox, Exception exception, CancellationToken token)
         {
-            var identity = Identity;
-            var reader = Channel.Reader;
-            while (!token.IsCancellationRequested)
-            {
-                var res = await reader.ReadAsync(token);
-                try
-                {
-                    if (identity.ConcurrentHandle)
-                    {
-                        _ = Task.Factory.StartNew(async () =>
-                        {
-                            try
-                            {
-                                var reply = await context.RequestAsync(res.Requqest, token);
-                                res.ReplySource.SetResult(reply);
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.LogError(ex, "When handle Request-Reply <{request},{reply}> error", identity.RequestType, identity.ReplyType);
-                            }
-                        }).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        var reply = await context.RequestAsync(res.Requqest, token).ConfigureAwait(false);
-                        res.ReplySource.SetResult(reply);
-                    }
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    Logger.LogError(ex, "When handle Request-Reply <{request},{reply}> error", identity.RequestType, identity.ReplyType);
-                    res.ReplySource.SetException(ex);
-                }
-            }
+            outbox?.SetException(exception);
+            return base.HandleExceptionAsync(outbox, exception, token);
+        }
+
+        protected override async Task HandleRequestAsync(IRequestReply requestReply, RequestReplyBox outbox, CancellationToken token)
+        {
+            var reply = await requestReply.RequestAsync(outbox.Requqest, token);
+            outbox.SetResult(reply);
+        }
+
+
+        protected override IAsyncEnumerable<RequestReplyBox> ReadAsync(CancellationToken token)
+        {
+            return Channel.Reader.ReadAllAsync(token);
         }
     }
 }

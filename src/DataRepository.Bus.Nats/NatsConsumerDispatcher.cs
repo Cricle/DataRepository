@@ -1,81 +1,47 @@
 ﻿using DataRepository.Bus.Serialization;
 using Microsoft.Extensions.Logging;
 using NATS.Client.JetStream;
+using System.Runtime.CompilerServices;
 
 namespace DataRepository.Bus.Nats
 {
-    public class NatsConsumerDispatcher : IConsumerDispatcher
+    internal class NatsConsumerDispatcher : ConsumerDispatcherBase<INatsJSConsumer>
     {
-        public NatsConsumerDispatcher(NatsConsumerIdentity identity, INatsJSStream stream, ILogger logger, IMessageSerialization messageSerialization)
+        public NatsConsumerDispatcher(NatsConsumerIdentity identity, INatsJSStream stream, ILogger logger, IMessageSerialization messageSerialization) : base(logger)
         {
-            Identity = identity;
+            Identity = natsConsumerIdentity = identity;
             Stream = stream;
             Logger = logger;
             MessageSerialization = messageSerialization;
         }
 
+        private readonly NatsConsumerIdentity natsConsumerIdentity;
+
         public INatsJSStream Stream { get; }
 
-        public NatsConsumerIdentity Identity { get; }
+        public override IConsumerIdentity Identity { get; }
 
         public ILogger Logger { get; }
 
         public IMessageSerialization MessageSerialization { get; }
 
-        IConsumerIdentity IDataDispatcher<IConsumerIdentity, IReadOnlyList<IConsumer>>.Identity => Identity;
-
-        public async Task LoopReceiveAsync(IReadOnlyList<IConsumer> consumers, CancellationToken token = default)
+        protected override async Task<INatsJSConsumer?> StartingCreateContextAsync(IReadOnlyList<IConsumer> context, CancellationToken token = default)
         {
-            var messageSerialization = MessageSerialization;
-            var logger = Logger;
-            var identity = Identity;
-            try
-            {
-                var jsConsumer = await Stream.CreateOrUpdateConsumerAsync(identity.ConsumerConfig, token).ConfigureAwait(false);
-                NatsJSMsg<ReadOnlyMemory<byte>>? msg = null;
-                var parallelTasks = new Task[consumers.Count];
-                while (!token.IsCancellationRequested)
-                {
-                    try
-                    {
-                        msg = await jsConsumer.NextAsync<ReadOnlyMemory<byte>>(null, identity.NatsJSNextOpts, token).ConfigureAwait(false);
-                        if (!msg.HasValue) continue;
+            return await Stream.CreateOrUpdateConsumerAsync(natsConsumerIdentity.ConsumerConfig, token).ConfigureAwait(false);
+        }
 
-                        if (identity.ParallelConsumer)
-                        {
-                            for (int i = 0; i < consumers.Count; i++)
-                                parallelTasks[i] = consumers[i].HandleAsync(messageSerialization.FromBytes(msg.Value.Data, identity.MessageType), token);
-                            await Task.WhenAll(parallelTasks).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            for (int i = 0; i < consumers.Count; i++)
-                                await consumers[i].HandleAsync(msg.Value.Data, token).ConfigureAwait(false);
-                        }
+        protected override async Task<object?> ReadSingleAsync(INatsJSConsumer? context, CancellationToken token)
+        {
+            var msg = await context!.NextAsync<ReadOnlyMemory<byte>>(cancellationToken: token).ConfigureAwait(false);
+            if (msg == null) return null;
+            return MessageSerialization.FromBytes(msg.Value.Data, Identity.MessageType);
+        }
 
-                        await msg.Value.AckAsync(default, token);
-                    }
-                    catch (Exception ex) when (!token.IsCancellationRequested)
-                    {
-                        logger.LogError(ex, "{Subject} handler error", identity.Subject);
-                        if (msg!=null)
-                        {
-                            await msg.Value.NakAsync(cancellationToken: token);
-                        }
-                    }
-                    finally
-                    {
-                        msg = null;
-                        if (identity.ParallelConsumer)
-                        {
-                            Array.Clear(parallelTasks, 0, parallelTasks.Length);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
+        protected override async IAsyncEnumerable<object?> ReadAsync(INatsJSConsumer? context, [EnumeratorCancellation] CancellationToken token)
+        {
+            await foreach (var item in context!.ConsumeAsync<ReadOnlyMemory<byte>>(cancellationToken: token).ConfigureAwait(false))
             {
-                logger.LogError(ex, "{Subject} Init fail", identity.Subject);
+                yield return MessageSerialization.FromBytes(item.Data, Identity.MessageType);
             }
         }
     }

@@ -4,7 +4,7 @@ namespace DataRepository.Bus.Nats
 {
     public class NatsRequestReplyIdentity : IRequestReplyIdentity
     {
-        public NatsRequestReplyIdentity(Type requestType, Type replyType, string subject, string publishKey, string? queueGroup, NatsSubOpts? natsSubOpts, uint scale)
+        public NatsRequestReplyIdentity(Type requestType, Type replyType, string subject, string publishKey, string? queueGroup, NatsSubOpts? natsSubOpts, uint scale, bool concurrentHandle)
         {
             RequestType = requestType;
             ReplyType = replyType;
@@ -13,6 +13,7 @@ namespace DataRepository.Bus.Nats
             NatsSubOpts = natsSubOpts;
             PublishKey = publishKey;
             Scale = scale;
+            ConcurrentHandle = concurrentHandle;
         }
 
         public Type RequestType { get; }
@@ -28,5 +29,7 @@ namespace DataRepository.Bus.Nats
         public NatsSubOpts? NatsSubOpts { get; }
 
         public uint Scale { get; }
+
+        public bool ConcurrentHandle { get; }
     }
 }

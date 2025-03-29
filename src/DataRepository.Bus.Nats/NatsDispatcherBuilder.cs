@@ -26,26 +26,31 @@ namespace DataRepository.Bus.Nats
         public IMessageSerialization MessageSerialization { get; }
 
         public INatsConnection Connection { get; }
-
-        public NatsDispatcherBuilder AddConsumer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(
-            string subject, StreamConfig streamConfig, ConsumerConfig consumerConfig, NatsJSNextOpts? natsJSNextOpts = null, bool parallelConsumer = true, uint scale = 1)
+        
+        public NatsDispatcherBuilder AddConsumer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(NatsConsumerIdentity identity)
         {
-            streamConfigMap[typeof(TMessage)] = new NatsConsumerIdentity(subject, streamConfig, consumerConfig, natsJSNextOpts, typeof(TMessage), parallelConsumer, scale);
+            consumerConfigMap[typeof(TMessage)] = identity;
             return this;
+        }
+        public NatsDispatcherBuilder AddConsumer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(
+            string subject, StreamConfig streamConfig, ConsumerConfig consumerConfig, NatsJSNextOpts? natsJSNextOpts = null, bool parallelConsumer = true, uint scale = 1, uint batchSize=1, bool concurrentHandle=false, TimeSpan? fetchTime=null)
+        {
+            var identity=new NatsConsumerIdentity(subject, streamConfig, consumerConfig, natsJSNextOpts, typeof(TMessage), parallelConsumer, scale, batchSize, concurrentHandle, fetchTime);
+            return AddConsumer<TMessage>(identity);
         }
 
         public NatsDispatcherBuilder AddConsumer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(
-            string subject, string id, NatsJSNextOpts? natsJSNextOpts = null, bool parallelConsumer = true, uint scale = 1)
+            string subject, string id, NatsJSNextOpts? natsJSNextOpts = null, bool parallelConsumer = true, uint scale = 1, uint batchSize = 1, bool concurrentHandle = false, TimeSpan? fetchTime = null)
         {
             var streamConfig = new StreamConfig(subject, [$"{subject}.*"]);
             var consumerConfig = new ConsumerConfig(id);
-            return AddConsumer<TMessage>($"{subject}.{id}", streamConfig, consumerConfig, natsJSNextOpts, parallelConsumer, scale);
+            return AddConsumer<TMessage>($"{subject}.{id}", streamConfig, consumerConfig, natsJSNextOpts, parallelConsumer, scale, batchSize, concurrentHandle, fetchTime);
         }
 
         public override async Task<IReadOnlyDictionary<Type, IConsumerDispatcher>> BuildConsumersAsync(CancellationToken token = default)
         {
             var result = new Dictionary<Type, IConsumerDispatcher>();
-            foreach (var item in streamConfigMap)
+            foreach (var item in consumerConfigMap)
             {
                 var stream = await NatsJSContext.CreateOrUpdateStreamAsync(item.Value.StreamConfig, token);
                 var dispatcher = new NatsConsumerDispatcher(item.Value, stream, LoggerFactory.CreateLogger($"Consumer<{item.Key.FullName}>"), MessageSerialization);
@@ -53,16 +58,15 @@ namespace DataRepository.Bus.Nats
             }
             return result.ToFrozenDictionary();
         }
-
-        public NatsDispatcherBuilder AddRequestReply<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(
-            string subject, string id, string? queueGroup = null, NatsSubOpts? natsSubOpts = null, uint scale = 1)
+        public NatsDispatcherBuilder AddRequestReply<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(NatsRequestReplyIdentity identity)
         {
-            var requestType = typeof(TRequest);
-            var replyType = typeof(TReply);
-            queueGroup = subject;
-            requestReplyConfigMap[new RequestReplyIdentity(requestType, replyType)] =
-                new NatsRequestReplyIdentity(requestType, replyType, $"{subject}.*", $"{subject}.{id}", queueGroup, natsSubOpts, scale);
+            requestReplyConfigMap[new RequestReplyIdentity(typeof(TRequest), typeof(TReply))] = identity;
             return this;
+        }
+        public NatsDispatcherBuilder AddRequestReply<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(
+            string subject, string id, string? queueGroup = null, NatsSubOpts? natsSubOpts = null, uint scale = 1, bool concurrentHandle = false)
+        {
+            return AddRequestReply<TRequest,TReply>(new NatsRequestReplyIdentity(typeof(TRequest), typeof(TReply), $"{subject}.*", $"{subject}.{id}", queueGroup, natsSubOpts, scale, concurrentHandle));
         }
 
         public override Task<IReadOnlyDictionary<RequestReplyIdentity, IRequestReplyDispatcher>> BuildRequestReplysAsync(CancellationToken token = default)
@@ -76,5 +80,6 @@ namespace DataRepository.Bus.Nats
             }
             return Task.FromResult<IReadOnlyDictionary<RequestReplyIdentity, IRequestReplyDispatcher>>(result.ToFrozenDictionary());
         }
+
     }
 }

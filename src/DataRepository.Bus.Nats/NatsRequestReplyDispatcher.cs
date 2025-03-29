@@ -4,51 +4,32 @@ using NATS.Client.Core;
 
 namespace DataRepository.Bus.Nats
 {
-    public class NatsRequestReplyDispatcher : IRequestReplyDispatcher
+    public class NatsRequestReplyDispatcher : RequestReplyDispatcherBase<NatsMsg<ReadOnlyMemory<byte>>>
     {
         private readonly INatsConnection connection;
-        private readonly ILogger logger;
         private readonly IMessageSerialization messageSerialization;
 
         public NatsRequestReplyDispatcher(INatsConnection connection,ILogger logger, IMessageSerialization messageSerialization, NatsRequestReplyIdentity identity)
+            :base(logger)
         {
             this.connection = connection;
-            this.logger = logger;
             this.messageSerialization = messageSerialization;
-            Identity = identity;
+            Identity = natsIdentity = identity;
         }
 
-        public NatsRequestReplyIdentity Identity { get; }
+        private readonly NatsRequestReplyIdentity natsIdentity;
 
-        IRequestReplyIdentity IDataDispatcher<IRequestReplyIdentity, IRequestReply>.Identity => Identity;
+        public override IRequestReplyIdentity Identity { get; }
 
-        public async Task LoopReceiveAsync(IRequestReply requestReply, CancellationToken token = default)
+        protected override IAsyncEnumerable<NatsMsg<ReadOnlyMemory<byte>>> ReadAsync(CancellationToken token)
+            => connection.SubscribeAsync<ReadOnlyMemory<byte>>(natsIdentity.Subject, natsIdentity.QueueGroup, null, natsIdentity.NatsSubOpts, token);
+
+        protected override async Task HandleRequestAsync(IRequestReply requestReply, NatsMsg<ReadOnlyMemory<byte>> outbox, CancellationToken token)
         {
-            var identity = Identity;
-            while (!token.IsCancellationRequested)
-            {
-                try
-                {
-                    await foreach (var item in connection.SubscribeAsync<ReadOnlyMemory<byte>>(identity.Subject, identity.QueueGroup, null, identity.NatsSubOpts, token))
-                    {
-                        try
-                        {
-                            var request = messageSerialization.FromBytes(item.Data, identity.RequestType);
-                            var res = await requestReply.RequestAsync(request, token).ConfigureAwait(false);
-                            var reply = messageSerialization.ToBytes(res, identity.ReplyType);
-                            await item.ReplyAsync(reply, cancellationToken: token).ConfigureAwait(false);
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.LogError(ex, "{subject}.{group} handle raised error", identity.Subject, identity.QueueGroup);
-                        }
-                    }
-                }
-                catch (Exception ex) when (!token.IsCancellationRequested)
-                {
-                    logger.LogError(ex, "{subject}.{group} raised error", identity.Subject, identity.QueueGroup);
-                }
-            }
+            var request = messageSerialization.FromBytes(outbox.Data, natsIdentity.RequestType);
+            var res = await requestReply.RequestAsync(request, token).ConfigureAwait(false);
+            var reply = messageSerialization.ToBytes(res, natsIdentity.ReplyType);
+            await outbox.ReplyAsync(reply, cancellationToken: token).ConfigureAwait(false);
         }
     }
 }

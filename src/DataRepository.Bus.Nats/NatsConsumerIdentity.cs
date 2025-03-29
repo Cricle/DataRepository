@@ -5,7 +5,7 @@ namespace DataRepository.Bus.Nats
 {
     public class NatsConsumerIdentity: IConsumerIdentity
     {
-        public NatsConsumerIdentity(string subject, StreamConfig streamConfig, ConsumerConfig consumerConfig, NatsJSNextOpts? natsJSNextOpts, Type messageType, bool parallelConsumer, uint scale)
+        public NatsConsumerIdentity(string subject, StreamConfig streamConfig, ConsumerConfig consumerConfig, NatsJSNextOpts? natsJSNextOpts, Type messageType, bool parallelConsumer, uint scale, uint batchSize, bool concurrentHandle, TimeSpan? fetchTime)
         {
             Subject = subject;
             StreamConfig = streamConfig;
@@ -14,6 +14,9 @@ namespace DataRepository.Bus.Nats
             ConsumerConfig = consumerConfig;
             MessageType = messageType;
             Scale = scale;
+            BatchSize = batchSize;
+            ConcurrentHandle = concurrentHandle;
+            FetchTime = fetchTime;
         }
 
         public string Subject { get; }
@@ -29,5 +32,11 @@ namespace DataRepository.Bus.Nats
         public Type MessageType { get; }
 
         public uint Scale { get; }
+
+        public uint BatchSize { get; }
+
+        public bool ConcurrentHandle { get; }
+
+        public TimeSpan? FetchTime { get; }
     }
 }

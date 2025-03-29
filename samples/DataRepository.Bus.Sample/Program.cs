@@ -7,13 +7,14 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        var s = new ServiceCollection()
+        var ss = new ServiceCollection()
             .AddLogging(x => x.AddConsole())
             //.AddNatsBus(p => p.AddConsumer<Student>("student","1",scale:100).AddRequestReply<Student,int>($"rr.student","a",scale:1024))
-            .AddInMemoryBus(p => p.AddConsumerUnBound<Student>().AddRequestReplyUnBound<Student, int>())
+            .AddInMemoryBus(p => p.AddConsumerUnBound<Student>(batchSize:1000,fetchTime:TimeSpan.FromMilliseconds(500)).AddRequestReplyUnBound<Student, int>())
             //.AddSingleton<IMessageSerialization>(new MemoryPackMessageSerialization(null))
             .AddMessageConsumer<Student, StudentConsumer>()
-            .AddRequestReply<Student, int, StudentRequestReply>()
+            .AddRequestReply<Student, int, StudentRequestReply>();
+        var s=ss
             .BuildServiceProvider();
         var bus = s.GetRequiredService<IBus>();
         await bus.StartAsync();
@@ -34,33 +35,34 @@ internal class Program
         //}
         //await Task.WhenAll(tasks);
         //Console.WriteLine(Stopwatch.GetElapsedTime(sw).TotalMilliseconds);
-        //Console.WriteLine($"{(GC.GetTotalMemory(false)-mem)/1024/1024.0}M");
+        //Console.WriteLine($"{(GC.GetTotalMemory(false) - mem) / 1024 / 1024.0}M");
+
         //Console.WriteLine(res);
-        var id = Random.Shared.Next(1, 9);
-        while (true)
-        {
-            var rep = await bus.RequestAsync<Student, int>(new Student { Id = id, Name = "aseda" });
-            Console.WriteLine($"{id}.{rep}");
-            await Task.Delay(Random.Shared.Next(200));
-        }
+        //var id = Random.Shared.Next(1, 9);
+        //while (true)
+        //{
+        //    var rep = await bus.RequestAsync<Student, int>(new Student { Id = id, Name = "aseda" });
+        //    Console.WriteLine($"{id}.{rep}");
+        //    await Task.Delay(Random.Shared.Next(200));
+        //}
         Console.ReadLine();
     }
 }
-
-public class StudentConsumer : IConsumer<Student>
+public class StudentConsumer : IBatchConsumer<Student>
 {
     public Task HandleAsync(Student message, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine("1"+message);
+        Console.WriteLine(message);
         return Task.CompletedTask;
     }
 }
 
 public class StudentRequestReply : IRequestReply<Student, int>
 {
-    public Task<int> RequestAsync(Student request, CancellationToken token = default)
+    public async Task<int> RequestAsync(Student request, CancellationToken token = default)
     {
-        return Task.FromResult(request.Id);
+        await Task.Delay(100);
+        return request.Id;
     }
 }
 //[MemoryPackable]

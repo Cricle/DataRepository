@@ -87,7 +87,10 @@ namespace DataRepository.Bus.Nats
                 var scaleTasks = new Task[item.Value.Identity.Scale];
                 for (int i = 0; i < scaleTasks.Length; i++)
                 {
-                    scaleTasks[i]= item.Value.LoopReceiveAsync(services, runningTokenSouce!.Token);
+                    scaleTasks[i] = item.Value.LoopReceiveAsync(services, runningTokenSouce!.Token).ContinueWith(t =>
+                    {
+                        HandleRequestReplyWorkerComplated(item.Key, item.Value, t);
+                    });
                 }
                 requestReplyTasks[index++] = scaleTasks;
             }
@@ -100,12 +103,15 @@ namespace DataRepository.Bus.Nats
             var index = 0;
             foreach (var item in consumerIdentities)
             {
-                var serviceType = typeof(IConsumer<>).MakeGenericType(item.Key);
-                var services = serviceScope!.ServiceProvider.GetServices(serviceType).Cast<IConsumer>().ToArray();
+                var serviceType = typeof(IBatchConsumer<>).MakeGenericType(item.Key);
+                var services = serviceScope!.ServiceProvider.GetServices(serviceType).Cast<IBatchConsumer>().ToArray();
                 var scaleTasks = new Task[item.Value.Identity.Scale];
                 for (int i = 0; i < scaleTasks.Length; i++)
                 {
-                    scaleTasks[i] = item.Value.LoopReceiveAsync(services, runningTokenSouce!.Token);
+                    scaleTasks[i] = item.Value.LoopReceiveAsync(services, runningTokenSouce!.Token).ContinueWith(t =>
+                    {
+                        HandleConsumerWorkerComplated(item.Key, item.Value, t);
+                    });
                 }
                 consumerTasks[index++] = scaleTasks;
             }
@@ -121,5 +127,35 @@ namespace DataRepository.Bus.Nats
             requestReplyIdentities = null;
             return Task.CompletedTask;
         }
+
+        private void HandleRequestReplyWorkerComplated(RequestReplyIdentity identity, IRequestReplyDispatcher dispatcher, Task task)
+        {
+            if (task.IsFaulted)
+            {
+                logger.LogError(task.Exception, "The request-reply <{request},{reply}> task was exit", identity.Request, identity.Reply);
+            }
+            else
+            {
+                logger.LogInformation("The request-reply <{request},{reply}> task was exit", identity.Request, identity.Reply);
+            }
+            OnHandleRequestReplyWorkerComplated(identity, dispatcher, task);
+        }
+
+        private void HandleConsumerWorkerComplated(Type type,IConsumerDispatcher dispatcher,Task task)
+        {
+            if (task.IsFaulted)
+            {
+                logger.LogError(task.Exception, "The consumer <{consumer}> task was exit", type);
+            }
+            else
+            {
+                logger.LogInformation("The consumer <{consumer}> task was exit", type);
+            }
+            OnHandleConsumerWorkerComplated(type, dispatcher, task);
+        }
+
+        protected virtual void OnHandleConsumerWorkerComplated(Type type, IConsumerDispatcher dispatcher, Task task) { }
+
+        protected virtual void OnHandleRequestReplyWorkerComplated(RequestReplyIdentity identity, IRequestReplyDispatcher dispatcher, Task task) { }
     }
 }

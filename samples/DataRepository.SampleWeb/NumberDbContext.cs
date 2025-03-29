@@ -9,6 +9,10 @@ namespace DataRepository.SampleWeb
         {
         }
 
+        public NumberDbContext()
+        {
+        }
+
         public DbSet<Number> Numbers => Set<Number>();
 
         public DbSet<GpsPosition> GpsPositions => Set<GpsPosition>();

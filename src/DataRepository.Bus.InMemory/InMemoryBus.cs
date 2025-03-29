@@ -59,7 +59,7 @@ namespace DataRepository.Bus.InMemory
             {
                 var requestReplyBox = new RequestReplyBox(message);
                 await dispatcher.Channel.Writer.WriteAsync(requestReplyBox, cancellationToken);
-                return (TReply)await requestReplyBox.ReplySource.Task;
+                return (TReply)await requestReplyBox.Task;
             }
             throw new InvalidOperationException($"No <{typeof(TRequest)},{typeof(TReply)}> handler registed");
         }
@@ -83,10 +83,10 @@ namespace DataRepository.Bus.InMemory
             var index = 0;
             foreach (var item in consumerIdentities)
             {
-                var serviceType = typeof(IConsumer<>).MakeGenericType(item.Key);
-                var services = serviceScope!.ServiceProvider.GetServices(serviceType).Cast<IConsumer>().ToArray();
+                var serviceType = typeof(IBatchConsumer<>).MakeGenericType(item.Key);
+                var services = serviceScope!.ServiceProvider.GetServices(serviceType).Cast<IBatchConsumer>().ToArray();
 
-                consumerTasks[index++] = item.Value.LoopReceiveAsync(services, tokenSource.Token);
+                consumerTasks[index++] = item.Value.LoopReceiveAsync(services, tokenSource!.Token);
             }
         }
 

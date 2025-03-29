@@ -15,20 +15,20 @@ namespace DataRepository.Bus.InMemory
 
         public InMemoryDispatcherBuilder AddConsumer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]TMessage>(InMemoryConsumerIdentity identity)
         {
-            streamConfigMap[typeof(TMessage)] = identity;
+            consumerConfigMap[typeof(TMessage)] = identity;
             return this;
         }
 
         public InMemoryDispatcherBuilder AddConsumerUnBound<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(
-             bool concurrentHandle=true, bool parallelConsumer=true)
+             bool concurrentHandle=true, bool parallelConsumer=true,uint batchSize=1,TimeSpan? fetchTime=null)
         {
-            return AddConsumer<TMessage>(new InMemoryConsumerIdentity(typeof(TMessage), concurrentHandle, parallelConsumer, true, new UnboundedChannelOptions { SingleReader = true },null));
+            return AddConsumer<TMessage>(new InMemoryConsumerIdentity(typeof(TMessage), concurrentHandle, parallelConsumer, true, new UnboundedChannelOptions { SingleReader = true }, null, batchSize, fetchTime));
         }
 
         public InMemoryDispatcherBuilder AddConsumerBound<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(
-             int capacity,bool concurrentHandle = true, bool parallelConsumer = true)
+             int capacity,bool concurrentHandle = true, bool parallelConsumer = true, uint batchSize = 1, TimeSpan? fetchTime = null)
         {
-            return AddConsumer<TMessage>(new InMemoryConsumerIdentity(typeof(TMessage), concurrentHandle, parallelConsumer, false,null, new BoundedChannelOptions(capacity){ SingleReader = true }));
+            return AddConsumer<TMessage>(new InMemoryConsumerIdentity(typeof(TMessage), concurrentHandle, parallelConsumer, false, null, new BoundedChannelOptions(capacity) { SingleReader = true, FullMode = BoundedChannelFullMode.Wait }, batchSize, fetchTime));
         }
 
         public InMemoryDispatcherBuilder AddRequestReply<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(
@@ -47,13 +47,13 @@ namespace DataRepository.Bus.InMemory
         public InMemoryDispatcherBuilder AddRequestReplyBound<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(
             int capacity, bool concurrentHandle = true)
         {
-            return AddRequestReply<TRequest, TReply>(new InMemoryRequestReplyIdentity(typeof(TRequest), typeof(TReply), concurrentHandle, false,null, new BoundedChannelOptions(capacity) { SingleReader = true }));
+            return AddRequestReply<TRequest, TReply>(new InMemoryRequestReplyIdentity(typeof(TRequest), typeof(TReply), concurrentHandle, false,null, new BoundedChannelOptions(capacity) { SingleReader = true, FullMode= BoundedChannelFullMode.Wait }));
         }
 
         public override Task<IReadOnlyDictionary<Type, IConsumerDispatcher>> BuildConsumersAsync(CancellationToken token = default)
         {
             var res = new Dictionary<Type, IConsumerDispatcher>();
-            foreach (var item in streamConfigMap)
+            foreach (var item in consumerConfigMap)
             {
                 var logger = LoggerFactory.CreateLogger($"Consumer <{item.Key}>");
                 res[item.Key]=new InMemoryConsumerDispatcher(item.Value, logger);

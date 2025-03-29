@@ -9,10 +9,10 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class InMemoryBusServiceExtensions
     {
         public static IServiceCollection AddMessageConsumer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TImpl>(this IServiceCollection services)
-            where TImpl : class, IConsumer<TMessage>
+            where TImpl : class, IBatchConsumer<TMessage>
             where TMessage : class
         {
-            services.AddScoped<IConsumer<TMessage>, TImpl>();
+            services.AddScoped<IBatchConsumer<TMessage>, TImpl>();
             return services;
         }
 
