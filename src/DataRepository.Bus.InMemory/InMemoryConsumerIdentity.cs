@@ -5,13 +5,14 @@ namespace DataRepository.Bus.InMemory
     public class InMemoryConsumerIdentity : ChannelIdentity, IConsumerIdentity
     {
         public InMemoryConsumerIdentity(Type messageType,
-            bool concurrentHandle, 
-            bool parallelConsumer, 
-            bool unBoundChannel, 
-            UnboundedChannelOptions? unBoundedChannelOptions, 
-            BoundedChannelOptions? boundedChannelOptions, 
-            uint batchSize, 
-            TimeSpan? fetchTime)
+            bool concurrentHandle,
+            bool parallelConsumer,
+            bool unBoundChannel,
+            UnboundedChannelOptions? unBoundedChannelOptions,
+            BoundedChannelOptions? boundedChannelOptions,
+            uint batchSize,
+            TimeSpan? fetchTime,
+            uint scale)
             : base(unBoundChannel, unBoundedChannelOptions, boundedChannelOptions)
         {
             MessageType = messageType;
@@ -19,11 +20,12 @@ namespace DataRepository.Bus.InMemory
             ParallelConsumer = parallelConsumer;
             BatchSize = batchSize;
             FetchTime = fetchTime;
+            Scale = scale;
         }
 
         public Type MessageType { get; }
 
-        uint IConsumerIdentity.Scale { get; } = 1;
+        public uint Scale { get; }
 
         public bool ConcurrentHandle { get; }
 

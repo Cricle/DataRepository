@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace DataRepository.Bus.InMemory
 {
-    internal sealed class InMemoryConsumerDispatcher : ConsumerDispatcherBase<object>
+    public sealed class InMemoryConsumerDispatcher : ConsumerDispatcherBase<object>
     {
         public InMemoryConsumerDispatcher(InMemoryConsumerIdentity identity, ILogger logger)
             : base(logger)

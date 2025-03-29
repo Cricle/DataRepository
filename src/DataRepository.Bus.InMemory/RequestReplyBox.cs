@@ -3,7 +3,7 @@ using System.Threading.Tasks.Sources;
 
 namespace DataRepository.Bus.InMemory
 {
-    internal sealed class RequestReplyBox : IValueTaskSource<object>
+    public sealed class RequestReplyBox : IValueTaskSource<object>
     {
         public RequestReplyBox(object requqest)
         {

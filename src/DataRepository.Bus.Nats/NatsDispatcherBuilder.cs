@@ -60,25 +60,29 @@ namespace DataRepository.Bus.Nats
         }
         public NatsDispatcherBuilder AddRequestReply<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(NatsRequestReplyIdentity identity)
         {
-            requestReplyConfigMap[new RequestReplyIdentity(typeof(TRequest), typeof(TReply))] = identity;
+            requestReplyConfigMap[new RequestReplyPair(typeof(TRequest), typeof(TReply))] = identity;
             return this;
         }
         public NatsDispatcherBuilder AddRequestReply<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(
             string subject, string id, string? queueGroup = null, NatsSubOpts? natsSubOpts = null, uint scale = 1, bool concurrentHandle = false)
         {
+            if (scale != 1 && queueGroup == null)
+            {
+                queueGroup = subject;
+            }
             return AddRequestReply<TRequest,TReply>(new NatsRequestReplyIdentity(typeof(TRequest), typeof(TReply), $"{subject}.*", $"{subject}.{id}", queueGroup, natsSubOpts, scale, concurrentHandle));
         }
 
-        public override Task<IReadOnlyDictionary<RequestReplyIdentity, IRequestReplyDispatcher>> BuildRequestReplysAsync(CancellationToken token = default)
+        public override Task<IReadOnlyDictionary<RequestReplyPair, IRequestReplyDispatcher>> BuildRequestReplysAsync(CancellationToken token = default)
         {
-            var result = new Dictionary<RequestReplyIdentity, IRequestReplyDispatcher>();
+            var result = new Dictionary<RequestReplyPair, IRequestReplyDispatcher>();
             foreach (var item in requestReplyConfigMap)
             {
                 var logger = LoggerFactory.CreateLogger($"RequestReply<{item.Key.Request.FullName}, {item.Key.Reply.FullName}>");
                 var dispatcher = new NatsRequestReplyDispatcher(Connection, logger, MessageSerialization, item.Value);
                 result[item.Key] = dispatcher;
             }
-            return Task.FromResult<IReadOnlyDictionary<RequestReplyIdentity, IRequestReplyDispatcher>>(result.ToFrozenDictionary());
+            return Task.FromResult<IReadOnlyDictionary<RequestReplyPair, IRequestReplyDispatcher>>(result.ToFrozenDictionary());
         }
 
     }

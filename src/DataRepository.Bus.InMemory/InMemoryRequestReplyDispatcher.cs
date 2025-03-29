@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace DataRepository.Bus.InMemory
 {
-    internal sealed class InMemoryRequestReplyDispatcher : RequestReplyDispatcherBase<RequestReplyBox>
+    public sealed class InMemoryRequestReplyDispatcher : RequestReplyDispatcherBase<RequestReplyBox>
     {
         public InMemoryRequestReplyDispatcher(InMemoryRequestReplyIdentity identity, ILogger logger) : base(logger)
         {
@@ -26,7 +26,7 @@ namespace DataRepository.Bus.InMemory
 
         protected override async Task HandleRequestAsync(IRequestReply requestReply, RequestReplyBox outbox, CancellationToken token)
         {
-            var reply = await requestReply.RequestAsync(outbox.Requqest, token);
+            var reply = await requestReply.RequestAsync(outbox.Requqest, token).ConfigureAwait(false);
             outbox.SetResult(reply);
         }
 

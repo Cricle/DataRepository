@@ -11,6 +11,8 @@ namespace DataRepository.Bus
         uint Scale { get; }
 
         bool ConcurrentHandle { get; }
+
+        RequestReplyPair RequestReplyPair => new RequestReplyPair(RequestType, ReplyType);
     }
 
     public interface IRequestReplyDispatcher : IDataDispatcher<IRequestReplyIdentity, IRequestReply>
@@ -56,7 +58,7 @@ namespace DataRepository.Bus
                             {
                                 try
                                 {
-                                    await HandleRequestAsync(context, catched, token);
+                                    await HandleRequestAsync(context, catched, token).ConfigureAwait(false);
                                 }
                                 catch (Exception ex)
                                 {
@@ -92,6 +94,6 @@ namespace DataRepository.Bus
         Task<TReply> RequestAsync(TRequest request, CancellationToken token = default);
 
         async Task<object> IRequestReply.RequestAsync(object request, CancellationToken token)
-            => (await RequestAsync((TRequest)request, token))!;
+            => (await RequestAsync((TRequest)request, token).ConfigureAwait(false))!;
     }
 }

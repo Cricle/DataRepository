@@ -4,28 +4,12 @@ using DataRepository.Bus.Serialization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
-using NATS.Net;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class NatsServiceExtensions
     {
-        public static IServiceCollection AddNatsJsonMessage(this IServiceCollection services, JsonSerializerOptions? options)
-        {
-            services.TryAddSingleton<IMessageSerialization>(new JsonMessageSerialization(options ?? JsonSerializerOptions.Default));
-            return services;
-        }
-
-        public static IServiceCollection AddMessageConsumer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]TMessage, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TImpl>(this IServiceCollection services)
-            where TImpl:class,IConsumer<TMessage>
-            where TMessage:class
-        {
-            services.AddScoped<IConsumer<TMessage>, TImpl>();
-            return services;
-        }
-
         public static IServiceCollection AddRequestReply<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TImpl>(this IServiceCollection services)
@@ -53,8 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 var natsConnection = p.GetRequiredService<INatsConnection>();
                 var consumerBuilder = new NatsDispatcherBuilder(p.GetRequiredService<ILoggerFactory>(), p.GetRequiredService<IMessageSerialization>(), natsConnection);
                 consumerConfig(consumerBuilder);
-                return new NatsBus(natsConnection, p.GetRequiredService<ILogger<NatsBus>>(),
-                    p.GetRequiredService<IMessageSerialization>(), p.GetRequiredService<IServiceScopeFactory>(), consumerBuilder);
+                return new NatsBus(natsConnection, p.GetRequiredService<IServiceScopeFactory>(), p.GetRequiredService<IMessageSerialization>(), p.GetRequiredService<ILogger<NatsBus>>(),consumerBuilder);
             });
             return services;
         }

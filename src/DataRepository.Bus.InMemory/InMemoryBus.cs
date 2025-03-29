@@ -1,120 +1,46 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace DataRepository.Bus.InMemory
 {
-    public class InMemoryBus : BusBase
+    public class InMemoryBus : BatchBusBase<InMemoryConsumerDispatcher,InMemoryRequestReplyDispatcher>
     {
-        private Task[]? consumerTasks;
-        private Task[]? requestReplyTasks;
-        private CancellationTokenSource? tokenSource;
-        private IReadOnlyDictionary<Type, InMemoryConsumerDispatcher>? consumerIdentities;
-        private IReadOnlyDictionary<RequestReplyIdentity, InMemoryRequestReplyDispatcher>? requestReplyIdentities;
-        private IServiceScope? serviceScope;
-
-        private readonly IServiceScopeFactory serviceScopeFactory;
-
-        public InMemoryBus(IDispatcherBuilder dispatcherBuilder, ILogger<InMemoryBus> logger, IServiceScopeFactory serviceScopeFactory)
+        public InMemoryBus(IServiceScopeFactory serviceScopeFactory, ILogger<InMemoryBus> logger, IDispatcherBuilder dispatcherBuilder)
+            : base(serviceScopeFactory, logger, dispatcherBuilder)
         {
-            DispatcherBuilder = dispatcherBuilder;
-            Logger = logger;
-            this.serviceScopeFactory = serviceScopeFactory;
         }
 
-        public IDispatcherBuilder DispatcherBuilder { get; }
-
-        public ILogger<InMemoryBus> Logger { get; }
-
-        public override async Task PublishAsync<TMessage>(TMessage message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
+        public override Task PublishAsync<TMessage>(TMessage message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
         {
-            if (consumerIdentities == null)
-            {
-                throw new InvalidOperationException("In memory bus must all in started");
-            }
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-            if (consumerIdentities.TryGetValue(typeof(TMessage), out var dispatcher))
-            {
-                await dispatcher.Channel.Writer.WriteAsync(message!, cancellationToken);
-                return;
-            }
-            throw new InvalidOperationException($"No {typeof(TMessage)} handler registed");
+            ThrowIfIdentitiesNull();
+            return base.PublishAsync(message, header, cancellationToken);
         }
 
-        public override async Task<TReply> RequestAsync<TRequest, TReply>(TRequest message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
+        public override Task<TReply> RequestAsync<TRequest, TReply>(TRequest message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
         {
-            if (requestReplyIdentities == null)
-            {
-                throw new InvalidOperationException("In memory bus must all in started");
-            }
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-            var identity = new RequestReplyIdentity(typeof(TRequest), typeof(TReply));
-            if (requestReplyIdentities.TryGetValue(identity, out var dispatcher))
-            {
-                var requestReplyBox = new RequestReplyBox(message);
-                await dispatcher.Channel.Writer.WriteAsync(requestReplyBox, cancellationToken);
-                return (TReply)await requestReplyBox.Task;
-            }
-            throw new InvalidOperationException($"No <{typeof(TRequest)},{typeof(TReply)}> handler registed");
+            ThrowIfIdentitiesNull();
+            return base.RequestAsync<TRequest, TReply>(message, header, cancellationToken);
         }
 
-        protected override async Task OnStartAsync(CancellationToken cancellationToken = default)
+        protected override async Task CorePublishAsync<TMessage>(TMessage message, IConsumerIdentity identity, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
         {
-            await OnStopAsync(cancellationToken);
-
-            serviceScope = serviceScopeFactory.CreateScope();
-            tokenSource = new CancellationTokenSource();
-
-            await BuildConsumerAsync(tokenSource.Token);
-            await BuildRequestReplyAsync(tokenSource.Token);
+            var dispatcher = consumerIdentities![typeof(TMessage)];
+            await dispatcher.Channel.Writer.WriteAsync(message!, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task BuildConsumerAsync(CancellationToken token)
+        protected override async Task<TReply> CoreRequestAsync<TRequest, TReply>(TRequest request, IRequestReplyIdentity identity, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
         {
-            var consumers = await DispatcherBuilder.BuildConsumersAsync(token).ConfigureAwait(false);
-            consumerIdentities = consumers.ToDictionary(x => x.Key, x => (InMemoryConsumerDispatcher)x.Value);
-            consumerTasks=new Task[consumers.Count];
-            var index = 0;
-            foreach (var item in consumerIdentities)
-            {
-                var serviceType = typeof(IBatchConsumer<>).MakeGenericType(item.Key);
-                var services = serviceScope!.ServiceProvider.GetServices(serviceType).Cast<IBatchConsumer>().ToArray();
-
-                consumerTasks[index++] = item.Value.LoopReceiveAsync(services, tokenSource!.Token);
-            }
+            var dispatcher = requestReplyIdentities![identity.RequestReplyPair];
+            var requestReplyBox = new RequestReplyBox(request!);
+            await dispatcher.Channel.Writer.WriteAsync(requestReplyBox, cancellationToken);
+            return (TReply)await requestReplyBox.Task;
         }
 
-        private async Task BuildRequestReplyAsync(CancellationToken token)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ThrowIfIdentitiesNull()
         {
-            var requestReplies = await DispatcherBuilder.BuildRequestReplysAsync(token).ConfigureAwait(false);
-            requestReplyIdentities = requestReplies.ToDictionary(x => x.Key, x => (InMemoryRequestReplyDispatcher)x.Value);
-            requestReplyTasks = new Task[requestReplyIdentities.Count];
-            var index = 0;
-            foreach (var item in requestReplyIdentities)
-            {
-                var serviceType = typeof(IRequestReply<,>).MakeGenericType(item.Key.Request, item.Key.Reply);
-                var services = (IRequestReply)serviceScope!.ServiceProvider.GetRequiredService(serviceType);
-
-                requestReplyTasks[index++] = item.Value.LoopReceiveAsync(services, token);
-            }
-        }
-
-        protected override Task OnStopAsync(CancellationToken cancellationToken = default)
-        {
-            consumerIdentities = null;
-            tokenSource?.Cancel();
-            consumerIdentities = null;
-            requestReplyIdentities = null;
-            consumerTasks = null;
-            requestReplyTasks = null;
-            serviceScope?.Dispose();
-            return Task.CompletedTask;
+            if (consumerIdentities == null) throw new InvalidOperationException("In memory bus must all in started");
         }
     }
 }

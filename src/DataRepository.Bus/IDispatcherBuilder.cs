@@ -4,10 +4,10 @@
     {
         IConsumerIdentity? GetConsumerIdentity(Type type);
 
-        IRequestReplyIdentity? GetRequestReplyIdentity(RequestReplyIdentity identity);
+        IRequestReplyIdentity? GetRequestReplyIdentity(RequestReplyPair identity);
 
         Task<IReadOnlyDictionary<Type, IConsumerDispatcher>> BuildConsumersAsync(CancellationToken token = default);
 
-        Task<IReadOnlyDictionary<RequestReplyIdentity, IRequestReplyDispatcher>> BuildRequestReplysAsync(CancellationToken token = default);
+        Task<IReadOnlyDictionary<RequestReplyPair, IRequestReplyDispatcher>> BuildRequestReplysAsync(CancellationToken token = default);
     }
 }

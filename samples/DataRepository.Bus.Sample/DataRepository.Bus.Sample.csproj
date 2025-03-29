@@ -16,6 +16,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DataRepository.Bus.InMemory\DataRepository.Bus.InMemory.csproj" />
+    <ProjectReference Include="..\..\src\DataRepository.Bus.Nats\DataRepository.Bus.Nats.csproj" />
+    <ProjectReference Include="..\..\src\DataRepository.Bus.Serialization.MemoryPack\DataRepository.Bus.Serialization.MemoryPack.csproj" />
   </ItemGroup>
 
 </Project>

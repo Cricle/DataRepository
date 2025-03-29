@@ -4,19 +4,20 @@ namespace DataRepository.Bus.InMemory
 {
     public class InMemoryRequestReplyIdentity :ChannelIdentity, IRequestReplyIdentity
     {
-        public InMemoryRequestReplyIdentity(Type requestType, Type replyType, bool concurrentHandle, bool unBoundChannel, UnboundedChannelOptions? unBoundedChannelOptions, BoundedChannelOptions? boundedChannelOptions)
+        public InMemoryRequestReplyIdentity(Type requestType, Type replyType, bool concurrentHandle, bool unBoundChannel, UnboundedChannelOptions? unBoundedChannelOptions, BoundedChannelOptions? boundedChannelOptions, uint scale)
             : base(unBoundChannel, unBoundedChannelOptions, boundedChannelOptions)
         {
             RequestType = requestType;
             ReplyType = replyType;
             ConcurrentHandle = concurrentHandle;
+            Scale = scale;
         }
 
         public Type RequestType { get; }
 
         public Type ReplyType { get; }
 
-        uint IRequestReplyIdentity.Scale { get; } = 1;
+        public uint Scale { get; }
 
         public bool ConcurrentHandle { get; }
     }

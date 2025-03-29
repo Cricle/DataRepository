@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<AssemblyName>DDataRepository.Bus.Nats</AssemblyName>
+		<PublishAot>true</PublishAot>
 	</PropertyGroup>
 
 	<ItemGroup>
