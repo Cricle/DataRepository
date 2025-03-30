@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DataRepository.Bus.Internals;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Metrics;
 
 namespace DataRepository.Bus
 {
@@ -38,12 +41,31 @@ namespace DataRepository.Bus
         public override async Task PublishAsync<TMessage>(TMessage message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(message);
-            var identity = DispatcherBuilder.GetConsumerIdentity(typeof(TMessage));
-            if (identity == null)
+            var messageType=typeof(TMessage);
+            using (var activity = BusActivities.busSource.StartActivity("Publish", ActivityKind.Internal, default(ActivityContext), [new KeyValuePair<string, object?>("messageType", messageType.FullName)]))
             {
-                throw new InvalidOperationException($"No {typeof(TMessage)} handler registed");
+                var identity = DispatcherBuilder.GetConsumerIdentity(messageType) ?? throw new InvalidOperationException($"No {messageType} handler registed");
+                try
+                {
+                    if (activity != null && header != null && header.Count != 0) 
+                    {
+                        foreach (var item in header)
+                        {
+                            activity.AddTag(item.Key, item.Value);
+                        }
+                    }
+
+                    await CorePublishAsync(message!, identity, header, cancellationToken);
+                    busMeter.IncrPublish(true, messageType.FullName!);
+                }
+                catch (Exception ex)
+                {
+                    activity?.AddException(ex);
+                    activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                    busMeter.IncrPublish(false, messageType.FullName!);
+                    throw;
+                }
             }
-            await CorePublishAsync(message!,identity, header, cancellationToken);
         }
         
         protected abstract Task CorePublishAsync<TMessage>(TMessage message,IConsumerIdentity identity, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
@@ -53,12 +75,33 @@ namespace DataRepository.Bus
            ArgumentNullException.ThrowIfNull(message);
 
             var identity = new RequestReplyPair(typeof(TRequest), typeof(TReply));
-            var rrIdentity = DispatcherBuilder.GetRequestReplyIdentity(identity);
-            if (rrIdentity == null)
+            using (var activity = BusActivities.busSource.StartActivity("Request", ActivityKind.Internal, default(ActivityContext),
+                [new KeyValuePair<string, object?>("requestType", identity.Request.FullName), new KeyValuePair<string, object?>("replyType", identity.Reply.FullName)]))
             {
-                throw new InvalidOperationException($"No <{typeof(TRequest)},{typeof(TReply)}> handler registed");
+                var rrIdentity = DispatcherBuilder.GetRequestReplyIdentity(identity) ?? throw new InvalidOperationException($"No <{typeof(TRequest)},{typeof(TReply)}> handler registed");
+                try
+                {
+                    if (activity != null && header != null && header.Count != 0)
+                    {
+                        foreach (var item in header)
+                        {
+                            activity.AddTag(item.Key, item.Value);
+                        }
+                    }
+
+                    var res = await CoreRequestAsync<TRequest, TReply>(message, rrIdentity, header, cancellationToken);
+                    busMeter.IncrRequest(true, identity.Request.FullName!, identity.Reply.FullName!);
+                    return res;
+                }
+                catch (Exception ex)
+                {
+                    activity?.AddException(ex);
+                    activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+
+                    busMeter.IncrRequest(false, identity.Request.FullName!, identity.Reply.FullName!);
+                    throw;
+                }
             }
-            return await CoreRequestAsync<TRequest, TReply>(message, rrIdentity, header, cancellationToken);
         }
 
         protected abstract Task<TReply> CoreRequestAsync<TRequest, TReply>(TRequest message, IRequestReplyIdentity identity, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
@@ -176,9 +219,19 @@ namespace DataRepository.Bus
     }
     public abstract class BusBase : IBus
     {
+        internal readonly BusMeter busMeter;
+
+        protected Meter Meter => busMeter.meter;
+
         private int isStarted = 0;
 
         public bool IsStarted => Volatile.Read(ref isStarted) == 1;
+
+        protected BusBase()
+        {
+            var type = GetType();
+            busMeter = new BusMeter(type.FullName!, BusActivities.Version);
+        }
 
         public void Dispose()
         {

@@ -9,14 +9,11 @@ namespace DataRepository.Bus.InMemory
         {
             Identity = identity;
             Channel = identity.CreateChannel<RequestReplyBox>();
-            Logger = logger;
         }
 
         public override IRequestReplyIdentity Identity { get; }
 
         public Channel<RequestReplyBox> Channel { get; }
-
-        public ILogger Logger { get; }
 
         protected override ValueTask HandleExceptionAsync(RequestReplyBox? outbox, Exception exception, CancellationToken token)
         {

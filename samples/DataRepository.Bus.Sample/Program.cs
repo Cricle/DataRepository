@@ -1,6 +1,4 @@
 ﻿using DataRepository.Bus;
-using DataRepository.Bus.Serialization;
-using DataRepository.Bus.Serialization.MemoryPack;
 using MemoryPack;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,9 +10,9 @@ internal class Program
     {
         var ss = new ServiceCollection()
             .AddLogging(x => x.AddConsole())
-            .AddNatsBus(p => p.AddConsumer<Student>("student", "1", scale: 100,batchSize:99,fetchTime:TimeSpan.FromMilliseconds(500)).AddRequestReply<Student, int>($"rr.student", "a", scale: 1024))
-            //.AddInMemoryBus(p => p.AddConsumerUnBound<Student>(batchSize:99,fetchTime:TimeSpan.FromSeconds(1)).AddRequestReplyUnBound<Student, int>())
-            .AddSingleton<IMessageSerialization>(new MemoryPackMessageSerialization(null))
+            //.AddNatsBus(p => p.AddConsumer<Student>("student", "1", scale: 100,batchSize:99,fetchTime:TimeSpan.FromMilliseconds(500)).AddRequestReply<Student, int>($"rr.student", "a", scale: 1024))
+            .AddInMemoryBus(p => p.AddConsumerUnBound<Student>(scale:1024).AddRequestReplyUnBound<Student, int>(scale:1024))
+            //.AddSingleton<IMessageSerialization>(new MemoryPackMessageSerialization(null))
             .AddMessageConsumer<Student, StudentConsumer>()
             .AddRequestReply<Student, int, StudentRequestReply>();
         var s=ss
@@ -41,16 +39,30 @@ internal class Program
         Console.WriteLine(Stopwatch.GetElapsedTime(sw).TotalMilliseconds);
         Console.WriteLine($"{(GC.GetTotalMemory(false) - mem) / 1024 / 1024.0}M");
 
-        await Task.Delay(10000);
-        Console.WriteLine("ssss"+StudentConsumer.index);
+        await Task.Delay(1000);
+        Console.WriteLine("ssss" + StudentConsumer.index);
         //Console.WriteLine(res);
-        //var id = Random.Shared.Next(1, 9);
-        //while (true)
+        //_ = Task.Factory.StartNew(async () =>
         //{
-        //    await bus.PublishAsync(new Student { Id = id});
-        //    //Console.WriteLine($"{id}");
-        //    await Task.Delay(Random.Shared.Next(200));
-        //}
+        //    var id = Random.Shared.Next(1, 9);
+        //    while (true)
+        //    {
+        //        await bus.PublishAsync(new Student { Id = id });
+        //        //Console.WriteLine($"{id}");
+        //        await Task.Delay(Random.Shared.Next(200));
+        //    }
+        //}); 
+        //_ = Task.Factory.StartNew(async () =>
+        //{
+        //    var id = Random.Shared.Next(1, 9);
+        //    while (true)
+        //    {
+        //        await bus.RequestAsync<Student,int>(new Student { Id = id });
+        //        //Console.WriteLine($"{id}");
+        //        await Task.Delay(Random.Shared.Next(200));
+        //    }
+        //});
+
         Console.ReadLine();
     }
 }

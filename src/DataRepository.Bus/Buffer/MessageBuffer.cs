@@ -1,4 +1,6 @@
-﻿namespace DataRepository.Bus.Buffer
+﻿using System.Runtime.CompilerServices;
+
+namespace DataRepository.Bus.Buffer
 {
     public sealed class MessageBuffer<TMessage>
     {
@@ -37,6 +39,7 @@
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BatchMessages<TMessage> ToBathMessages() => BatchMessages<TMessage>.Create(messages, index);
     }
 }

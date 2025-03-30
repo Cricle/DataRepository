@@ -10,14 +10,11 @@ namespace DataRepository.Bus.InMemory
         {
             Identity = identity;
             Channel = identity.CreateChannel<object>();
-            Logger = logger;
         }
 
         public override IConsumerIdentity Identity { get; }
 
         public Channel<object> Channel { get; }
-
-        public ILogger Logger { get; }
 
         protected override async Task<object?> ReadSingleAsync(object? _, CancellationToken token) => await Channel.Reader.ReadAsync(token);
     }

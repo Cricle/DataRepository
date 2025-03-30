@@ -39,7 +39,7 @@ namespace DataRepository.Bus.InMemory
         }
 
         public InMemoryDispatcherBuilder AddRequestReplyUnBound<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(
-            bool concurrentHandle = true, uint scale = 1)
+            bool concurrentHandle = false, uint scale = 1)
         {
             return AddRequestReply<TRequest, TReply>(new InMemoryRequestReplyIdentity(typeof(TRequest), typeof(TReply), concurrentHandle, true, new UnboundedChannelOptions { SingleReader = scale == 1 }, null, scale));
         }

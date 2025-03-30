@@ -11,7 +11,6 @@ namespace DataRepository.Bus.Nats
         {
             Identity = natsConsumerIdentity = identity;
             Stream = stream;
-            Logger = logger;
             MessageSerialization = messageSerialization;
         }
 
@@ -20,8 +19,6 @@ namespace DataRepository.Bus.Nats
         public INatsJSStream Stream { get; }
 
         public override IConsumerIdentity Identity { get; }
-
-        public ILogger Logger { get; }
 
         public IMessageSerialization MessageSerialization { get; }
 
