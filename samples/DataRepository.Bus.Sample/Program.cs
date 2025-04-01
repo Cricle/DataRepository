@@ -11,7 +11,7 @@ internal class Program
         var ss = new ServiceCollection()
             .AddLogging(x => x.AddConsole())
             //.AddNatsBus(p => p.AddConsumer<Student>("student", "1", scale: 100,batchSize:99,fetchTime:TimeSpan.FromMilliseconds(500)).AddRequestReply<Student, int>($"rr.student", "a", scale: 1024))
-            .AddInMemoryBus(p => p.AddConsumerUnBound<Student>(scale:1024).AddRequestReplyUnBound<Student, int>(scale:1024))
+            .AddInMemoryBus(p => p.AddConsumerUnBound<Student>(scale:1024).AddRequestReplyUnBound<Student, int>(scale:1))
             //.AddSingleton<IMessageSerialization>(new MemoryPackMessageSerialization(null))
             .AddMessageConsumer<Student, StudentConsumer>()
             .AddRequestReply<Student, int, StudentRequestReply>();
@@ -21,49 +21,69 @@ internal class Program
         await bus.StartAsync();
         await bus.RequestAsync<Student, int>(new Student { Id = 1 });
 
-        var mem = GC.GetTotalMemory(true);
-        var sw = Stopwatch.GetTimestamp();
-        var tasks = new Task[1_000];
-        for (int i = 0; i < tasks.Length; i++)
-        {
-            tasks[i] = Task.Factory.StartNew(async () =>
-            {
-                for (int j = 0; j < 10; j++)
-                {
-                    //var res = await bus.RequestAsync<Student, int>(new Student { Id = j });
-                    await bus.PublishAsync(new Student { Id = j });
-                }
-            }).Unwrap();
-        }
-        await Task.WhenAll(tasks);
-        Console.WriteLine(Stopwatch.GetElapsedTime(sw).TotalMilliseconds);
-        Console.WriteLine($"{(GC.GetTotalMemory(false) - mem) / 1024 / 1024.0}M");
+        //var mem = GC.GetTotalMemory(true);
+        //var sw = Stopwatch.GetTimestamp();
+        //var tasks = new Task[1_000];
+        //for (int i = 0; i < tasks.Length; i++)
+        //{
+        //    tasks[i] = Task.Factory.StartNew(async () =>
+        //    {
+        //        for (int j = 0; j < 10; j++)
+        //        {
+        //            //var res = await bus.RequestAsync<Student, int>(new Student { Id = j });
+        //            await bus.PublishAsync(new Student { Id = j });
+        //        }
+        //    }).Unwrap();
+        //}
+        //await Task.WhenAll(tasks);
+        //Console.WriteLine(Stopwatch.GetElapsedTime(sw).TotalMilliseconds);
+        //Console.WriteLine($"{(GC.GetTotalMemory(false) - mem) / 1024 / 1024.0}M");
 
-        await Task.Delay(1000);
-        Console.WriteLine("ssss" + StudentConsumer.index);
+        //await Task.Delay(1000);
+        //Console.WriteLine("ssss" + StudentConsumer.index);
+        //var tasks = new Task[10_000];
+        //var reqTime = 0L;
+        //var totalReqs = 0L;
+        //for (int i = 0; i < tasks.Length; i++)
+        //{
+        //    tasks[i] = Task.Factory.StartNew( async() =>
+        //    {
+        //        while (true)
+        //        {
+        //            var sw = Stopwatch.GetTimestamp();
+        //            await bus.RequestAsync<Student, int>(new Student { Id = i });
+        //            var ed = (long)Stopwatch.GetElapsedTime(sw).TotalMilliseconds;
+        //            Interlocked.Increment(ref reqTime);
+        //            Interlocked.Add(ref totalReqs,ed);
+        //        }
+        //    }).Unwrap();
+        //}
         //Console.WriteLine(res);
-        //_ = Task.Factory.StartNew(async () =>
-        //{
-        //    var id = Random.Shared.Next(1, 9);
-        //    while (true)
-        //    {
-        //        await bus.PublishAsync(new Student { Id = id });
-        //        //Console.WriteLine($"{id}");
-        //        await Task.Delay(Random.Shared.Next(200));
-        //    }
-        //}); 
-        //_ = Task.Factory.StartNew(async () =>
-        //{
-        //    var id = Random.Shared.Next(1, 9);
-        //    while (true)
-        //    {
-        //        await bus.RequestAsync<Student,int>(new Student { Id = id });
-        //        //Console.WriteLine($"{id}");
-        //        await Task.Delay(Random.Shared.Next(200));
-        //    }
-        //});
+        _ = Task.Factory.StartNew(async () =>
+        {
+            var id = Random.Shared.Next(1, 9);
+            while (true)
+            {
+                _ = bus.PublishAsync(new Student { Id = id });
+                //Console.WriteLine($"{id}");
+                await Task.Delay(Random.Shared.Next(200));
+            }
+        });
+        _ = Task.Factory.StartNew(async () =>
+        {
+            var id = Random.Shared.Next(1, 9);
+            while (true)
+            {
+                _= bus.RequestAsync<Student, int>(new Student { Id = id });
+                //Console.WriteLine($"{id}");
+                await Task.Delay(Random.Shared.Next(200));
+            }
+        });
 
         Console.ReadLine();
+        //Console.WriteLine(reqTime);
+        //Console.WriteLine(totalReqs);
+        //Console.WriteLine(reqTime/(double)totalReqs);
     }
 }
 public class StudentConsumer : IBatchConsumer<Student>

@@ -21,6 +21,7 @@ namespace DataRepository.Bus
             this.logger = logger;
             var type = GetType();
             cdMeter = new ConsumerDispatcherMeter(type.FullName!, BusActivities.Version);
+            cdMeter.pendingMessageFunc = GetPenddingMessageCount;
         }
 
         public abstract IConsumerIdentity Identity { get; }
@@ -40,6 +41,8 @@ namespace DataRepository.Bus
                 logger.LogError(exception, "When handle Consumer {type} error", Identity.MessageType);
             return ValueTask.CompletedTask;
         }
+
+        protected virtual long GetPenddingMessageCount() => 0;
 
         private async Task SingleLoopReceiveAsync(IReadOnlyList<IConsumer> context, CancellationToken token = default)
         {

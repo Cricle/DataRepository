@@ -1,12 +1,14 @@
-﻿namespace DataRepository.Bus.Serialization
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace DataRepository.Bus.Serialization
 {
     public interface IMessageSerialization
     {
-        ReadOnlyMemory<byte> ToBytes<TMessage>(TMessage message);
+        ReadOnlyMemory<byte> ToBytes<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(TMessage message);
 
         ReadOnlyMemory<byte> ToBytes(object message,Type type);
 
-        TMessage FromBytes<TMessage>(ReadOnlyMemory<byte> buffer);
+        TMessage FromBytes<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(ReadOnlyMemory<byte> buffer);
 
         object FromBytes(ReadOnlyMemory<byte> buffer,Type type);
     }

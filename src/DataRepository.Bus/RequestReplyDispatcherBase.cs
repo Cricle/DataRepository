@@ -17,6 +17,7 @@ namespace DataRepository.Bus
             this.logger = logger;
             var type = GetType();
             rrMeter = new RequestReplyDispatcherMeter(type.FullName!, BusActivities.Version);
+            rrMeter.pendingMessageFunc = GetPenddingMessageCount;
         }
 
         public abstract IRequestReplyIdentity Identity { get; }
@@ -33,6 +34,8 @@ namespace DataRepository.Bus
         }
 
         protected abstract Task HandleRequestAsync(IRequestReply requestReply, TOutbox outbox, CancellationToken token);
+
+        protected virtual long GetPenddingMessageCount() => 0;
 
         public async Task LoopReceiveAsync(IRequestReply context, CancellationToken token = default)
         {

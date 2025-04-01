@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.Metrics;
+using System.Runtime.CompilerServices;
 
 namespace DataRepository.Bus.Internals
 {
@@ -25,6 +26,7 @@ namespace DataRepository.Bus.Internals
             requestFail = meter.CreateCounter<long>("requestFail");
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncrPublish(bool succeed, string messageType)
         {
             var pair = new KeyValuePair<string, object?>("messageType", messageType);
@@ -39,6 +41,7 @@ namespace DataRepository.Bus.Internals
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncrRequest(bool succeed, string requestType, string replyType)
         {
             var pair1 = new KeyValuePair<string, object?>("requestType", requestType);

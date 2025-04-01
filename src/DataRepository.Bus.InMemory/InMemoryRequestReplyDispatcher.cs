@@ -32,5 +32,7 @@ namespace DataRepository.Bus.InMemory
         {
             return Channel.Reader.ReadAllAsync(token);
         }
+
+        protected override long GetPenddingMessageCount() => Channel.Reader.Count;
     }
 }

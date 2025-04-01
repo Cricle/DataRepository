@@ -10,14 +10,6 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class NatsServiceExtensions
     {
-        public static IServiceCollection AddRequestReply<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TImpl>(this IServiceCollection services)
-            where TImpl : class, IRequestReply<TRequest, TReply>
-        {
-            services.AddScoped<IRequestReply<TRequest,TReply>, TImpl>();
-            return services;
-        }
 
         public static IServiceCollection AddNatsBus(this IServiceCollection services, Action<NatsDispatcherBuilder> consumerConfig, Action<IServiceProvider, NatsOpts>? optsConfig = null)
         {

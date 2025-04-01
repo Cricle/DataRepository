@@ -17,5 +17,7 @@ namespace DataRepository.Bus.InMemory
         public Channel<object> Channel { get; }
 
         protected override async Task<object?> ReadSingleAsync(object? _, CancellationToken token) => await Channel.Reader.ReadAsync(token);
+
+        protected override long GetPenddingMessageCount() => Channel.Reader.Count;
     }
 }

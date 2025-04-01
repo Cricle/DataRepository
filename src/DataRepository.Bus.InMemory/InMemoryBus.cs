@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace DataRepository.Bus.InMemory
 {
-    public class InMemoryBus : BatchBusBase<InMemoryConsumerDispatcher,InMemoryRequestReplyDispatcher>
+    public class InMemoryBus : BatchBusBase<InMemoryConsumerDispatcher, InMemoryRequestReplyDispatcher>
     {
         public InMemoryBus(IServiceScopeFactory serviceScopeFactory, ILogger<InMemoryBus> logger, IDispatcherBuilder dispatcherBuilder)
             : base(serviceScopeFactory, logger, dispatcherBuilder)

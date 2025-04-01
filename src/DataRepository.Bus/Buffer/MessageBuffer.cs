@@ -23,6 +23,7 @@ namespace DataRepository.Bus.Buffer
             messages = new TMessage[maxCount];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Add(TMessage message)
         {
             messages[index++] = message;
@@ -30,12 +31,13 @@ namespace DataRepository.Bus.Buffer
         }
 
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
             index = 0;
             if (!IsValueType)
             {
-                Array.Clear(messages, 0, messages.Length);
+                messages.AsSpan().Clear();
             }
         }
 
