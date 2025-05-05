@@ -11,7 +11,7 @@ namespace DataRepository.Benchmark
         private IBus bus;
         private IAsyncRequestHandler<Student,int> publisher;
 
-        [Params(1)]
+        [Params(1,20)]
         public int RequestCount { get; set; }
 
         [GlobalSetup]

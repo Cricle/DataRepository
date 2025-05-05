@@ -5,9 +5,9 @@ namespace DataRepository.Bus.Serialization
 {
     public class JsonMessageSerialization : IMessageSerialization
     {
-        private readonly JsonSerializerOptions? options;
+        internal readonly JsonSerializerOptions? options;
 
-        public JsonMessageSerialization(JsonSerializerOptions? options) => this.options = options;
+        public JsonMessageSerialization(JsonSerializerOptions? options = null) => this.options = options;
 
         [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
         [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]

@@ -41,7 +41,7 @@ namespace DataRepository.Casing.Redis
         {
             var count = results.Count();
             var keys = new RedisKey[count][];
-            var constKey = new RedisKey[] { key };
+            var constKey = new RedisKey[] { GetKey(key) };
             keys.AsSpan().Fill(constKey);
             var values = new RedisValue[count][];
 

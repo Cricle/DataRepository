@@ -2,7 +2,7 @@
 
 namespace DataRepository.Bus.Buffer
 {
-    public sealed class MessageBuffer<TMessage>
+    internal sealed class MessageBuffer<TMessage>
     {
         private static readonly bool IsValueType = typeof(TMessage).IsValueType;
 

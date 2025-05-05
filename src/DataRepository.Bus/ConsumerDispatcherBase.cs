@@ -10,11 +10,11 @@ namespace DataRepository.Bus
     public abstract class ConsumerDispatcherBase<TContext> : IConsumerDispatcher
     {
         internal readonly ConsumerDispatcherMeter cdMeter;
-        protected Meter Meter => cdMeter.meter;
+        protected internal Meter Meter => cdMeter.meter;
 
-        protected static readonly Task<TContext?> nullContext = Task.FromResult<TContext?>(default);
+        protected internal static readonly Task<TContext?> nullContext = Task.FromResult<TContext?>(default);
 
-        protected readonly ILogger logger;
+        protected internal readonly ILogger logger;
 
         protected ConsumerDispatcherBase(ILogger logger)
         {
@@ -26,16 +26,16 @@ namespace DataRepository.Bus
 
         public abstract IConsumerIdentity Identity { get; }
 
-        protected virtual async IAsyncEnumerable<object?> ReadAsync(TContext? context, [EnumeratorCancellation] CancellationToken token)
+        protected internal virtual async IAsyncEnumerable<object?> ReadAsync(TContext? context, [EnumeratorCancellation] CancellationToken token)
         {
             yield return await ReadSingleAsync(context, token);
         }
 
-        protected virtual Task<TContext?> StartingCreateContextAsync(IReadOnlyList<IConsumer> context, CancellationToken token = default) => nullContext;
+        protected internal virtual Task<TContext?> StartingCreateContextAsync(IReadOnlyList<IConsumer> context, CancellationToken token = default) => nullContext;
 
         protected abstract Task<object?> ReadSingleAsync(TContext? context, CancellationToken token);
 
-        protected virtual ValueTask HandleErrorAsync(TContext? context, Exception exception, CancellationToken token)
+        protected internal virtual ValueTask HandleErrorAsync(TContext? context, Exception exception, CancellationToken token)
         {
             if (!token.IsCancellationRequested)
                 logger.LogError(exception, "When handle Consumer {type} error", Identity.MessageType);
@@ -44,7 +44,7 @@ namespace DataRepository.Bus
 
         protected virtual long GetPenddingMessageCount() => 0;
 
-        private async Task SingleLoopReceiveAsync(IReadOnlyList<IConsumer> context, CancellationToken token = default)
+        internal async Task SingleLoopReceiveAsync(IReadOnlyList<IConsumer> context, CancellationToken token = default)
         {
             var tasks = new Task[context.Count];
             var identity = Identity;
@@ -110,7 +110,7 @@ namespace DataRepository.Bus
             }
         }
 
-        private async Task BatchLoopReceiveAsync(IReadOnlyList<IBatchConsumer> context, CancellationToken token = default)
+        internal async Task BatchLoopReceiveAsync(IReadOnlyList<IBatchConsumer> context, CancellationToken token = default)
         {
             var tasks = new Task[context.Count];
             var identity = Identity;

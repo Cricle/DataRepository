@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataRepository.Bus.Serializ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataRepository.Bus.InMemory", "src\DataRepository.Bus.InMemory\DataRepository.Bus.InMemory.csproj", "{AB5FBC2D-F4B8-4E3C-B77E-660427357479}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataRepository.Bus.Test", "tests\DataRepository.Bus.Test\DataRepository.Bus.Test.csproj", "{584CAB30-704F-483F-9021-B270024979B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{AB5FBC2D-F4B8-4E3C-B77E-660427357479}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB5FBC2D-F4B8-4E3C-B77E-660427357479}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB5FBC2D-F4B8-4E3C-B77E-660427357479}.Release|Any CPU.Build.0 = Release|Any CPU
+		{584CAB30-704F-483F-9021-B270024979B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{584CAB30-704F-483F-9021-B270024979B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{584CAB30-704F-483F-9021-B270024979B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{584CAB30-704F-483F-9021-B270024979B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +114,7 @@ Global
 		{7AF33E7E-7011-4688-977F-2343D36BE70F} = {BAF50800-4CD8-447A-A19D-5A837005BA4C}
 		{F21AF8ED-5DF5-4E8E-B1B4-C7D222AF471A} = {29CD2462-B78F-4EC6-AF4C-788AB49AB26C}
 		{C2A0C249-45D0-4115-99A0-AC2518967BB2} = {BAF50800-4CD8-447A-A19D-5A837005BA4C}
+		{584CAB30-704F-483F-9021-B270024979B3} = {29CD2462-B78F-4EC6-AF4C-788AB49AB26C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {21FD3793-CC16-408F-A6A2-C88FC152D4F1}

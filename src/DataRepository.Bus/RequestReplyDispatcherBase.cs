@@ -8,9 +8,9 @@ namespace DataRepository.Bus
     public abstract class RequestReplyDispatcherBase<TOutbox> : IRequestReplyDispatcher
     {
         internal readonly RequestReplyDispatcherMeter rrMeter;
-        protected Meter Meter => rrMeter.meter;
+        protected internal Meter Meter => rrMeter.meter;
 
-        protected readonly ILogger logger;
+        protected internal readonly ILogger logger;
 
         protected RequestReplyDispatcherBase(ILogger logger)
         {
@@ -22,9 +22,9 @@ namespace DataRepository.Bus
 
         public abstract IRequestReplyIdentity Identity { get; }
 
-        protected abstract IAsyncEnumerable<TOutbox> ReadAsync(CancellationToken token);
+        protected internal abstract IAsyncEnumerable<TOutbox> ReadAsync(CancellationToken token);
 
-        protected virtual ValueTask HandleExceptionAsync(TOutbox? outbox, Exception exception, CancellationToken token)
+        protected internal virtual ValueTask HandleExceptionAsync(TOutbox? outbox, Exception exception, CancellationToken token)
         {
             if (!token.IsCancellationRequested)
             {
@@ -33,9 +33,9 @@ namespace DataRepository.Bus
             return ValueTask.CompletedTask;
         }
 
-        protected abstract Task HandleRequestAsync(IRequestReply requestReply, TOutbox outbox, CancellationToken token);
+        protected internal abstract Task HandleRequestAsync(IRequestReply requestReply, TOutbox outbox, CancellationToken token);
 
-        protected virtual long GetPenddingMessageCount() => 0;
+        protected internal virtual long GetPenddingMessageCount() => 0;
 
         public async Task LoopReceiveAsync(IRequestReply context, CancellationToken token = default)
         {

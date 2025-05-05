@@ -14,7 +14,7 @@ namespace DataRepository.Bus
         }
     }
 
-    public abstract partial class BatchBusBase<TConsumerDispatcher,TRequestReplyDispatcher> : BusBase
+    public abstract partial class BatchBusBase<TConsumerDispatcher, TRequestReplyDispatcher> : BusBase
         where TConsumerDispatcher : IConsumerDispatcher
         where TRequestReplyDispatcher : IRequestReplyDispatcher
     {
@@ -27,9 +27,9 @@ namespace DataRepository.Bus
 
         protected BatchBusBase(IServiceScopeFactory serviceScopeFactory, ILogger logger, IDispatcherBuilder dispatcherBuilder)
         {
-            ServiceScopeFactory = serviceScopeFactory;
-            Logger = logger;
-            DispatcherBuilder = dispatcherBuilder;
+            ServiceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            DispatcherBuilder = dispatcherBuilder ?? throw new ArgumentNullException(nameof(dispatcherBuilder));
         }
 
         public ILogger Logger { get; }
@@ -38,16 +38,16 @@ namespace DataRepository.Bus
 
         public IServiceScopeFactory ServiceScopeFactory { get; }
 
-        public override async Task PublishAsync<TMessage>(TMessage message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
+        public override async Task PublishAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(TMessage message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(message);
-            var messageType=typeof(TMessage);
+            var messageType = typeof(TMessage);
             using (var activity = BusActivities.busSource.StartActivity("Publish", ActivityKind.Internal, default(ActivityContext), [new KeyValuePair<string, object?>("messageType", messageType.FullName)]))
             {
                 var identity = DispatcherBuilder.GetConsumerIdentity(messageType) ?? throw new InvalidOperationException($"No {messageType} handler registed");
                 try
                 {
-                    if (activity != null && header != null && header.Count != 0) 
+                    if (activity != null && header != null && header.Count != 0)
                     {
                         foreach (var item in header)
                         {
@@ -67,12 +67,12 @@ namespace DataRepository.Bus
                 }
             }
         }
-        
-        protected abstract Task CorePublishAsync<TMessage>(TMessage message,IConsumerIdentity identity, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
 
-        public override async Task<TReply> RequestAsync<TRequest, TReply>(TRequest message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
+        protected internal abstract Task CorePublishAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(TMessage message, IConsumerIdentity identity, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
+
+        public override async Task<TReply> RequestAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(TRequest message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default)
         {
-           ArgumentNullException.ThrowIfNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             var identity = new RequestReplyPair(typeof(TRequest), typeof(TReply));
             using (var activity = BusActivities.busSource.StartActivity("Request", ActivityKind.Internal, default(ActivityContext),
@@ -104,9 +104,9 @@ namespace DataRepository.Bus
             }
         }
 
-        protected abstract Task<TReply> CoreRequestAsync<TRequest, TReply>(TRequest message, IRequestReplyIdentity identity, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
-       
-        protected override async Task OnStartAsync(CancellationToken cancellationToken = default)
+        protected internal abstract Task<TReply> CoreRequestAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(TRequest message, IRequestReplyIdentity identity, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
+
+        protected internal override async Task OnStartAsync(CancellationToken cancellationToken = default)
         {
             await OnStopAsync(cancellationToken);
 
@@ -117,7 +117,7 @@ namespace DataRepository.Bus
             await BuildRequestReplyAsync(tokenSource.Token);
         }
 
-        protected override Task OnStopAsync(CancellationToken cancellationToken = default)
+        protected internal override Task OnStopAsync(CancellationToken cancellationToken = default)
         {
             consumerIdentities = null;
             tokenSource?.Cancel();
@@ -130,7 +130,7 @@ namespace DataRepository.Bus
         }
 
         [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
-        private async Task BuildConsumerAsync(CancellationToken token)
+        internal async Task BuildConsumerAsync(CancellationToken token)
         {
             var consumers = await DispatcherBuilder.BuildConsumersAsync(token).ConfigureAwait(false);
             consumerIdentities = consumers.ToDictionary(x => x.Key, x => (TConsumerDispatcher)x.Value);
@@ -153,7 +153,7 @@ namespace DataRepository.Bus
         }
 
         [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
-        private async Task BuildRequestReplyAsync(CancellationToken token)
+        internal async Task BuildRequestReplyAsync(CancellationToken token)
         {
             var requestReplies = await DispatcherBuilder.BuildRequestReplysAsync(token).ConfigureAwait(false);
             requestReplyIdentities = requestReplies.ToDictionary(x => x.Key, x => (TRequestReplyDispatcher)x.Value);
@@ -175,11 +175,11 @@ namespace DataRepository.Bus
             }
         }
 
-        private void HandleRequestReplyWorkerComplated(RequestReplyPair identity, IRequestReplyDispatcher dispatcher, Task task)
+        internal void HandleRequestReplyWorkerComplated(RequestReplyPair identity, IRequestReplyDispatcher dispatcher, Task task)
         {
             if (task.IsFaulted)
             {
-                RequestReplyFaultedError(Logger, task.Exception,identity.Request,identity.Reply);
+                RequestReplyFaultedError(Logger, task.Exception, identity.Request, identity.Reply);
             }
             else
             {
@@ -188,7 +188,7 @@ namespace DataRepository.Bus
             OnHandleRequestReplyWorkerComplated(identity, dispatcher, task);
         }
 
-        private void HandleConsumerWorkerComplated(Type type, IConsumerDispatcher dispatcher, Task task)
+        internal void HandleConsumerWorkerComplated(Type type, IConsumerDispatcher dispatcher, Task task)
         {
             if (task.IsFaulted)
             {
@@ -201,9 +201,9 @@ namespace DataRepository.Bus
             OnHandleConsumerWorkerComplated(type, dispatcher, task);
         }
 
-        protected virtual void OnHandleConsumerWorkerComplated(Type type, IConsumerDispatcher dispatcher, Task task) { }
+        protected internal virtual void OnHandleConsumerWorkerComplated(Type type, IConsumerDispatcher dispatcher, Task task) { }
 
-        protected virtual void OnHandleRequestReplyWorkerComplated(RequestReplyPair identity, IRequestReplyDispatcher dispatcher, Task task) { }
+        protected internal virtual void OnHandleRequestReplyWorkerComplated(RequestReplyPair identity, IRequestReplyDispatcher dispatcher, Task task) { }
 
         [LoggerMessage(Message = "The request-reply <{request},{reply}> task was exit", Level = LogLevel.Error)]
         internal static partial void RequestReplyFaultedError(ILogger logger, Exception ex, Type request, Type reply);
@@ -245,9 +245,9 @@ namespace DataRepository.Bus
             GC.SuppressFinalize(this);
         }
 
-        public abstract Task PublishAsync<TMessage>(TMessage message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
+        public abstract Task PublishAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(TMessage message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
 
-        public virtual async Task PublishManyAsync<TMessage>(IEnumerable<TMessage> messages, Func<TMessage, IDictionary<string, object?>?>? headerFactory = null, CancellationToken cancellationToken = default)
+        public virtual async Task PublishManyAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMessage>(IEnumerable<TMessage> messages, Func<TMessage, IDictionary<string, object?>?>? headerFactory = null, CancellationToken cancellationToken = default)
         {
             foreach (var item in messages)
             {
@@ -255,7 +255,7 @@ namespace DataRepository.Bus
             }
         }
 
-        public abstract Task<TReply> RequestAsync<TRequest, TReply>(TRequest message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
+        public abstract Task<TReply> RequestAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply>(TRequest message, IDictionary<string, object?>? header = null, CancellationToken cancellationToken = default);
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
@@ -263,7 +263,7 @@ namespace DataRepository.Bus
                 await OnStartAsync(cancellationToken);
         }
 
-        protected abstract Task OnStartAsync(CancellationToken cancellationToken = default);
+        protected internal abstract Task OnStartAsync(CancellationToken cancellationToken = default);
 
         public async Task StopAsync(CancellationToken cancellationToken = default)
         {
@@ -271,6 +271,6 @@ namespace DataRepository.Bus
                 await OnStopAsync(cancellationToken);
         }
 
-        protected abstract Task OnStopAsync(CancellationToken cancellationToken = default);
+        protected internal abstract Task OnStopAsync(CancellationToken cancellationToken = default);
     }
 }
