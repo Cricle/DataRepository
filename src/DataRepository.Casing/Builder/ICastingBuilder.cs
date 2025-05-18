@@ -1,9 +1,15 @@
 ﻿using DataRepository.Casing;
-using Microsoft.Extensions.DependencyInjection;
+#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace DataRepository.Builder
 {
-    public interface ICastingBuilder<TValue>
+    public interface ICastingBuilder<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    TValue>
     {
         IServiceProvider Provider { get; }
 

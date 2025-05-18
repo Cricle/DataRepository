@@ -2,6 +2,9 @@
 using DataRepository.Casing.Redis;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Text.Json;
+#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -40,7 +43,11 @@ namespace Microsoft.Extensions.DependencyInjection
             public JsonSerializerOptions JsonSerializerOptions { get; }
         }
 
-        internal sealed class DIJsonNewestValueConverter<TModel> : JsonNewestValueConverter<TModel>
+        internal sealed class DIJsonNewestValueConverter<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+        TModel> : JsonNewestValueConverter<TModel>
         {
             public DIJsonNewestValueConverter(JsonOptionsBox box) 
                 : base(box.JsonSerializerOptions)

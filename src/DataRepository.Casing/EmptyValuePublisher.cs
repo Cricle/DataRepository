@@ -1,6 +1,14 @@
-﻿namespace DataRepository.Casing
+﻿#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
+
+namespace DataRepository.Casing
 {
-    public sealed class EmptyValuePublisher<T> : IValuePublisher<T>
+    public sealed class EmptyValuePublisher<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    T> : IValuePublisher<T>
     {
         public static EmptyValuePublisher<T> Instance { get; } = new EmptyValuePublisher<T>();
 

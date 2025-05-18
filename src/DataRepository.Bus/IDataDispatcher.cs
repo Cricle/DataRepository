@@ -1,6 +1,8 @@
-﻿namespace DataRepository.Bus
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace DataRepository.Bus
 {
-    public interface IDataDispatcher<TIdentity, TContext>
+    public interface IDataDispatcher<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TIdentity, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TContext>
     {
         TIdentity Identity { get; }
 

@@ -1,11 +1,13 @@
-﻿namespace DataRepository.Bus
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace DataRepository.Bus
 {
     public interface IRequestReply
     {
         Task<object> RequestAsync(object request, CancellationToken token = default);
     }
 
-    public interface IRequestReply<TRequest, TReply> : IRequestReply
+    public interface IRequestReply<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TReply> : IRequestReply
     {
         Task<TReply> RequestAsync(TRequest request, CancellationToken token = default);
 

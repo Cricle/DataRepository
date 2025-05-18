@@ -14,7 +14,7 @@ namespace DataRepository.Bus
         }
     }
 
-    public abstract partial class BatchBusBase<TConsumerDispatcher, TRequestReplyDispatcher> : BusBase
+    public abstract partial class BatchBusBase<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TConsumerDispatcher, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequestReplyDispatcher> : BusBase
         where TConsumerDispatcher : IConsumerDispatcher
         where TRequestReplyDispatcher : IRequestReplyDispatcher
     {

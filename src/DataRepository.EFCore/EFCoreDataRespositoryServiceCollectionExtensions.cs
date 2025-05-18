@@ -2,6 +2,7 @@
 using DataRepository.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Diagnostics.CodeAnalysis;
 
 #pragma warning disable IDE0130
 namespace Microsoft.Extensions.DependencyInjection
@@ -9,7 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class EFCoreDataRespositoryServiceCollectionExtensions
     {
-        public static IServiceCollection AddRespository<TDbContext>(this IServiceCollection services, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
+        public static IServiceCollection AddRespository<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TDbContext>(this IServiceCollection services, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
             where TDbContext : DbContext
         {
             services.TryAddScoped<IDbContextStore, DbContextStore<TDbContext>>();
@@ -19,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddKeyRespository<TDbContext>(this IServiceCollection services, object? key, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
+        public static IServiceCollection AddKeyRespository<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TDbContext>(this IServiceCollection services, object? key, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
             where TDbContext : DbContext
         {
             services.TryAddKeyedScoped<IDbContextStore, DbContextStore<TDbContext>>(key);
@@ -34,13 +35,13 @@ namespace Microsoft.Extensions.DependencyInjection
             DbContext DbContext { get; }
         }
 
-        internal sealed class DbContextStore<TDbContext>(TDbContext dbContext) : IDbContextStore
+        internal sealed class DbContextStore<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TDbContext>(TDbContext dbContext) : IDbContextStore
             where TDbContext : DbContext
         {
             public DbContext DbContext { get; } = dbContext;
         }
 
-        internal sealed class DbContextEFRespository<TEntity> : EFRespository<TEntity> where TEntity : class
+        internal sealed class DbContextEFRespository<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TEntity> : EFRespository<TEntity> where TEntity : class
         {
             public DbContextEFRespository(IDbContextStore creator) : base(creator.DbContext)
             {

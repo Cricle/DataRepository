@@ -1,6 +1,8 @@
-﻿namespace DataRepository.Bus
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace DataRepository.Bus
 {
-    public abstract class DispatcherBuilderBase<TConsumerIdentity, TRequestReplyIdentity> : IDispatcherBuilder
+    public abstract class DispatcherBuilderBase<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TConsumerIdentity, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequestReplyIdentity> : IDispatcherBuilder
         where TConsumerIdentity : class, IConsumerIdentity
         where TRequestReplyIdentity : class, IRequestReplyIdentity
     {

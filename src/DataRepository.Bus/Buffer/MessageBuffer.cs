@@ -1,8 +1,9 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace DataRepository.Bus.Buffer
 {
-    internal sealed class MessageBuffer<TMessage>
+    internal sealed class MessageBuffer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]TMessage>
     {
         private static readonly bool IsValueType = typeof(TMessage).IsValueType;
 

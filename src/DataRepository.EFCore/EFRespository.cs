@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore.Query;
 using System.Collections;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace DataRepository.EFCore
 {
     [DebuggerDisplay("{ToString,nq}")]
-    public class EFRespository<TEntity> : IDataRespository<TEntity>
+    public class EFRespository<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TEntity> : IDataRespository<TEntity>
         where TEntity : class
     {
         internal readonly IQueryable<TEntity> query;
@@ -37,11 +38,11 @@ namespace DataRepository.EFCore
 
         public IQueryable CreateQuery(Expression expression) => Context.GetService<IAsyncQueryProvider>().CreateQuery(expression);
 
-        public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => Context.GetService<IAsyncQueryProvider>().CreateQuery<TElement>(expression);
+        public IQueryable<TElement> CreateQuery<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TElement>(Expression expression) => Context.GetService<IAsyncQueryProvider>().CreateQuery<TElement>(expression);
 
         public object? Execute(Expression expression) => Context.GetService<IAsyncQueryProvider>().Execute(expression);
 
-        public TResult Execute<TResult>(Expression expression) => Context.GetService<IAsyncQueryProvider>().Execute<TResult>(expression);
+        public TResult Execute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResult>(Expression expression) => Context.GetService<IAsyncQueryProvider>().Execute<TResult>(expression);
 
         public async Task<IDataTransaction> BeginTransactionAsync(IsolationLevel level = IsolationLevel.ReadCommitted, CancellationToken token = default)
             => new EFDataTransaction(await Context.Database.BeginTransactionAsync(level, token), level);

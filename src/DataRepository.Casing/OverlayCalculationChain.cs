@@ -1,6 +1,14 @@
-﻿namespace DataRepository.Casing
+﻿#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
+
+namespace DataRepository.Casing
 {
-    public class OverlayCalculationChain<TValue> : List<IOverlayCalculation<TValue>>, IOverlayCalculation<TValue>
+    public class OverlayCalculationChain<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    TValue> : List<IOverlayCalculation<TValue>>, IOverlayCalculation<TValue>
     {
         private readonly IValuePublisher<TValue> valuePublisher;
 

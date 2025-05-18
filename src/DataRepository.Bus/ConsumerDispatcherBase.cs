@@ -2,12 +2,13 @@
 using DataRepository.Bus.Internals;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Metrics;
 using System.Runtime.CompilerServices;
 
 namespace DataRepository.Bus
 {
-    public abstract class ConsumerDispatcherBase<TContext> : IConsumerDispatcher
+    public abstract class ConsumerDispatcherBase<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TContext> : IConsumerDispatcher
     {
         internal readonly ConsumerDispatcherMeter cdMeter;
         protected internal Meter Meter => cdMeter.meter;

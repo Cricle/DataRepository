@@ -1,10 +1,17 @@
 ﻿using DataRepository.Casing.Models;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
+#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace DataRepository.Casing.Redis
 {
-    public class RedisHashCasingNewest<T> : RedisOverlayCalculation<T>, ICasingNewest<T>
+    public class RedisHashCasingNewest<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    T> : RedisOverlayCalculation<T>, ICasingNewest<T>
         where T : ITimedValue
     {
         internal const string TimeKey = "t";

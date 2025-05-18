@@ -1,8 +1,15 @@
 ﻿using DataRepository.Casing.Models;
+#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace DataRepository.Casing
 {
-    public interface ICasingNewest<T> : IOverlayCalculation<T>
+    public interface ICasingNewest<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    T> : IOverlayCalculation<T>
         where T : ITimedValue
     {
         Task SetAsync(string key, T result, CancellationToken token = default);

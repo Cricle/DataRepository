@@ -1,8 +1,16 @@
-﻿using System.Linq.Expressions;
+﻿#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
+using System.Linq.Expressions;
 
 namespace DataRepository
 {
-    public interface IQueryScope<TEntity> : IQueryable<TEntity>, IAsyncEnumerable<TEntity>
+    public interface IQueryScope<
+#if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+
+    TEntity> : IQueryable<TEntity>, IAsyncEnumerable<TEntity>
         where TEntity : class
     {
         Task<int> CountAsync(CancellationToken token = default);

@@ -1,9 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
+#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace DataRepository.Casing.Redis
 {
-    public abstract class RedisOverlayCalculation<TValue> : RedisLuaScripter, IOverlayCalculation<TValue>
+    public abstract class RedisOverlayCalculation<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+
+    TValue> : RedisLuaScripter, IOverlayCalculation<TValue>
     {
         protected RedisOverlayCalculation(IConnectionMultiplexer connectionMultiplexer,
             ILogger logger)

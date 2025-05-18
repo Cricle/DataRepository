@@ -1,8 +1,15 @@
 ﻿using System.Linq.Expressions;
+#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace DataRepository
 {
-    public interface IUpdateSetBuilder<TEntity>
+    public interface IUpdateSetBuilder<
+#if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    TEntity>
     {
         int SetCount { get; }
 

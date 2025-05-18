@@ -1,6 +1,14 @@
-﻿namespace DataRepository.Casing
+﻿#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
+
+namespace DataRepository.Casing
 {
-    public interface IValuePublisher<T>
+    public interface IValuePublisher<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    T>
     {
         Task<int> PublishAsync(string key, T value, CancellationToken token = default);
 

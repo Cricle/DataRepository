@@ -1,8 +1,15 @@
-﻿using System.Linq.Expressions;
+﻿#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
+using System.Linq.Expressions;
 
 namespace DataRepository
 {
-    public interface IDataBatchRespository<TEntity>
+    public interface IDataBatchRespository<
+#if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    TEntity>
     {
         int InsertMany(IEnumerable<TEntity> entities);
 

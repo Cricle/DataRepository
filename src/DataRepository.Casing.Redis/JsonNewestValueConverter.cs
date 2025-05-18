@@ -1,9 +1,15 @@
 ﻿using StackExchange.Redis;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace DataRepository.Casing.Redis
 {
-    public class JsonNewestValueConverter<T> : INewestValueConverter<T>
+    public class JsonNewestValueConverter<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+
+    T> : INewestValueConverter<T>
     {
         private readonly JsonSerializerOptions options;
 

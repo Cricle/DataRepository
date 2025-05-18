@@ -1,10 +1,17 @@
 ﻿using DataRepository.Casing.Models;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
+#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace DataRepository.Casing.Redis
 {
-    public class RedisSortSetTopN<T> : RedisOverlayCalculation<T>, ITopN<T>
+    public class RedisSortSetTopN<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    T> : RedisOverlayCalculation<T>, ITopN<T>
         where T : ITimedValue
     {
         private readonly INewestValueConverter<T> converter;

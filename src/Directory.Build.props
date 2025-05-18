@@ -13,7 +13,6 @@
   </PropertyGroup>
 
 	<PropertyGroup Condition="'$(PublishAot)'=='true'">
-                                <TargetFrameworks>net8.0</TargetFrameworks>
 		<TargetFramework>net8.0</TargetFramework>
 	</PropertyGroup>
 

@@ -1,9 +1,16 @@
 ﻿using DataRepository.Casing;
 using Microsoft.Extensions.DependencyInjection;
+#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace DataRepository.Builder
 {
-    public sealed class DefaultCastingBuilder<TValue> : ICastingBuilder<TValue>
+    public sealed class DefaultCastingBuilder<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+        TValue> : ICastingBuilder<TValue>
     {
         public DefaultCastingBuilder(IServiceProvider provider,IValuePublisher<TValue> valuePublisher)
         {

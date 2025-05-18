@@ -1,6 +1,14 @@
-﻿namespace DataRepository.Casing
+﻿#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
+
+namespace DataRepository.Casing
 {
-    public interface IOverlayCalculation<TValue> : IInitable
+    public interface IOverlayCalculation<
+#if !NETSTANDARD
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+        TValue> : IInitable
     {
         Task AddAsync(string key, TValue result, CancellationToken token = default);
 

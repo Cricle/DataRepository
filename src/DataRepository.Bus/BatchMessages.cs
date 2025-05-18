@@ -1,10 +1,11 @@
 ﻿using System.Buffers;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace DataRepository.Bus
 {
-    public readonly struct BatchMessages<T> : IDisposable
+    public readonly struct BatchMessages<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : IDisposable
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BatchMessages<T> Create(T[] buffer, int size)

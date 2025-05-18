@@ -1,11 +1,12 @@
 ﻿using DataRepository.Bus.Internals;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Metrics;
 
 namespace DataRepository.Bus
 {
-    public abstract class RequestReplyDispatcherBase<TOutbox> : IRequestReplyDispatcher
+    public abstract class RequestReplyDispatcherBase<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TOutbox> : IRequestReplyDispatcher
     {
         internal readonly RequestReplyDispatcherMeter rrMeter;
         protected internal Meter Meter => rrMeter.meter;

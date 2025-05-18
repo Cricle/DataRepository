@@ -1,6 +1,14 @@
-﻿namespace DataRepository
+﻿#if !NETSTANDARD
+using System.Diagnostics.CodeAnalysis;
+#endif
+
+namespace DataRepository
 {
-    public interface IDataOperatorRespository<TEntity>
+    public interface IDataOperatorRespository<
+#if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+    TEntity>
     {
         int Insert(TEntity entity);
 
